@@ -30,11 +30,10 @@ sourceSets {
         groovy {
             srcDirs = ['.']
         }
-        // switch on debug output with ./gradlew Example -PdebugExample
-        if (project.hasProperty('debugExample')) {
-            resources {
-               srcDirs = ['resources']
-            }
+        // You can update log4j.properties under resources directory
+        // to set logging level e.g. DEBUG
+        resources {
+           srcDirs = ['resources']
         }
     }
 }
