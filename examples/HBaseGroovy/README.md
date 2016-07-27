@@ -46,7 +46,7 @@ To run the examples, in a command prompt window:
    - some output from running the command on my machine is shown below
 
 ```bash
-$ cd examples/HBaseroovy
+$ cd examples/HBaseGroovy
 $ ./gradlew Example
 :compileJava UP-TO-DATE
 :compileGroovy
