@@ -1,0 +1,68 @@
+// set the dependencies for running the groovy script
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.codehaus.groovy:groovy-all:2.0.5'
+        classpath 'org.apache.hive:hive-jdbc:2.0.0'
+    }
+}
+
+plugins {
+  id 'groovy'
+  id 'org.hidetake.ssh' version '1.5.0'
+}
+
+// set the dependencies for compiling the groovy script
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.0.5'
+    compile 'org.apache.hive:hive-jdbc:2.0.0'
+}
+
+// tell gradle the groovy script is in the same folder as the build.gradle file
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['.']
+        }
+    }
+}
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+// task to run a script
+task('Example', type: JavaExec) {
+
+    Properties props = new Properties()
+    props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+    if (!(new File("${projectDir}/../../certificate").exists())) {
+        throw new GradleException("'certificate' file could not be found in ${projectDir.parentFile.parentFile}")
+    }
+
+    println ">> Remove key store"
+    delete './truststore.jks'
+
+    // import the BigInsights manager certificate
+    println ">> Create key store"
+    ant.exec(executable: "${getKeytoolPath()}", dir:'./') {
+        arg(line: '-import -trustcacerts -alias biginsights -file ../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt')
+    }
+
+    // pass environment variables to the groovy script
+    // hostname is set by identifying HIVE_SERVER host
+    // if hive server 2 is running on default port, change Example.groovy jdbc connection
+    environment 'hostname', getMasters(props)['HIVE_SERVER'][0]
+    environment 'username', props.username
+    environment 'password', props.password
+
+    // run the groovy script
+    main = 'Example'
+    classpath = sourceSets.main.runtimeClasspath
+}

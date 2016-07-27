@@ -1,0 +1,207 @@
+import groovyx.net.http.RESTClient
+import groovy.json.JsonSlurper
+import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.model.build.BuildEnvironment
+import org.apache.tools.ant.taskdefs.condition.Os
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+def getJavaHome() {
+    def connection = GradleConnector.newConnector()
+        .forProjectDirectory(new File("$projectDir/../../"))
+        .connect();
+
+    def javahome 
+
+    try {
+        def env = connection.getModel(BuildEnvironment.class);
+        javahome = env.getJava().getJavaHome();
+    } finally {
+        connection.close();
+    }
+    return javahome 
+}
+
+def getKeytoolPath() {
+    def path 
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        path = "${getJavaHome()}\\bin\\keytool.exe"
+    } else {
+        path = "${getJavaHome()}/bin/keytool"
+    }
+    if (!file(path).exists()) {
+        throw new GradleException("Cannot find java keytool in ${getJavaHome()}/bin")
+    }
+    return path
+}
+
+// setup the connection details for ssh
+remotes {
+    bicluster {
+       host = getHostnameFromUrl(props.gateway)
+       user = props.username
+       password = props.password
+    }
+    def bigsql_head = getMasters(props)['BIGSQL_HEAD']
+    if (bigsql_head) {
+        // we use ssh (scp) to download the jdbc libraries needed to connect to dashDB
+        bicluster_bigsql_head {
+           host = bigsql_head
+           user = props.username
+           password = props.password
+        }
+    }
+}
+
+ssh.settings {
+    if (props.known_hosts == 'allowAnyHosts') {
+        // disable ssh host key verification 
+        knownHosts = allowAnyHosts
+    }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.codehaus.groovy:groovy-all:2.0.5'
+        classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+    }
+}
+
+def getHostnameFromUrl(url) {
+    def matcher = url =~ /^(https?:\/\/)([^:^\/]*)(:\d*)?(.*)?.*$/
+    return matcher[0][2]
+}
+
+def isURLValid(url) {
+    try {
+        new URL(url)
+            return true
+    } catch (MalformedURLException e) {
+        return false
+    }
+} 
+
+def getMasterManagerHost(props) {
+    // extract BigInsights hostname from the gateway url
+    def matcher = props.gateway =~ /^(https?:\/\/)([^:^\/]*):(\d*)?(.*)?.*$/
+
+    return matcher[0][2]
+}
+
+def getBigSqlHeadHost(props) {
+    def bigSqlHeadMaster = getMasters(props)
+    if (bigSqlHeadMaster == null || bigSqlHeadMaster['BIGSQL_HEAD'] == null) {
+        return null
+    } else {
+        return bigSqlHeadMaster['BIGSQL_HEAD'][0]
+    }
+}
+
+def getMasters(props) {
+    return getMasters(props.ambariUrl, props.ambariUsername, props.ambariPassword)
+}
+
+def getMasters(ambariUrl, ambariUsername, ambariPassword) {
+
+    assert isURLValid(ambariUrl) : "Could not find ambariUrl in connection.properties"
+    assert ambariUsername : "Could not find ambariUsername in connection.properties"
+    assert ambariPassword : "Could not find ambariPassword in connection.properties"
+
+
+    def client = new RESTClient( ambariUrl )
+    client.ignoreSSLIssues()
+
+    client.headers['Authorization'] = 'Basic ' + "$ambariUsername:$ambariPassword".getBytes('iso-8859-1').encodeBase64()
+    client.headers['X-Requested-By'] = 'ambari'
+
+    // Make REST call to get clusters
+    def resp = client.get( path : 'api/v1/clusters' )
+
+    assert resp.status == 200  // HTTP response code; 404 means not found, etc.
+
+    // Parse output to JSON
+    def jsonSlurper = new JsonSlurper()
+    def object = jsonSlurper.parseText(resp.data.text)
+
+    // Get Cluster Name
+    def clusterName = object.items.Clusters[0].cluster_name
+
+    // println "Clustername: ${clusterName}"
+
+    // Define service and corresponding master components
+    def services = [
+       'BIGSQL':'BIGSQL_HEAD',
+       'KNOX':'KNOX_GATEWAY',
+       'HIVE':'HIVE_SERVER',
+    ]
+
+    def masterMap = [:]
+    services.each { service_name, component_name ->
+
+       // println "Looking up service [${service_name}] component [${component_name}] on ${clusterName}"
+
+       try {
+           // Make REST to get compoent info
+           def respComponent = client.get( path : 'api/v1/clusters/' + clusterName + '/services/' + service_name + '/components/' + component_name )
+
+           assert respComponent.status == 200  // HTTP response code; 404 means not found, etc.
+
+           // Get hostname
+           def object_component = jsonSlurper.parseText(respComponent.data.text)
+
+           masterMap[component_name] = object_component.host_components.HostRoles.host_name
+        } catch (Exception e) {
+           // ignore
+        }
+    }
+    return masterMap
+}
+
+// export this method by attaching it to a project ext property
+ext{
+    getHostnameFromUrl = this.&getHostnameFromUrl
+    getMasters = this.&getMasters
+    getBigSqlHeadHost = this.&getBigSqlHeadHost
+    getMasterManagerHost = this.&getMasterManagerHost
+    getJavaHome = this.&getJavaHome
+    getKeytoolPath = this.&getKeytoolPath
+}
+
+task('clean') << {
+    delete './lib'
+}
+
+task('SetupLibs') {
+
+    // if running this task with clean, ensure clean runs first
+    mustRunAfter clean 
+
+    // tell gradle we don't need to run this task if the ./lib folder exists
+    outputs.files file("${projectDir}/lib/")
+
+    doLast {
+
+        // create a folder for the libraries
+        mkdir("${projectDir}/lib")
+
+        ['db2jcc.jar', 'db2jcc4.jar', 'db2jcc_license_cu.jar'].each { jar ->
+            if (!file("${projectDir}/lib/${jar}").exists()) 
+            {
+                def src = file("${projectDir}/../../downloads/${jar}")
+                def dst = file("${projectDir}/lib/")
+
+                println "Attepmting to copy ${src.absolutePath} to ${dst.absolutePath}"
+
+                if (!src.exists()) {
+                    throw new GradleException("${src.absolutePath} not found. Have you copied ${jar} to ${src.absolutePath}? See https://github.com/snowch/biginsight-examples/issues/17/")
+                }
+                copy{ from(src) into(dst) }
+            } 
+        }
+    }
+}
+

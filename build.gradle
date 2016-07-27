@@ -1,0 +1,656 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+import static org.gradle.testfixtures.ProjectBuilder.*
+import static org.gradle.testkit.runner.TaskOutcome.*
+import org.gradle.testfixtures.ProjectBuilder
+import com.jcraft.jsch.JSchException
+import javax.net.ssl.*
+import groovyx.net.http.RESTClient
+import groovy.json.JsonSlurper
+import static groovy.io.FileType.FILES
+
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.codehaus.groovy:groovy-all:2.0.5'
+        classpath 'jline:jline:2.12'
+        classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+        classpath gradleTestKit()
+    }
+}
+
+plugins {
+  id 'org.hidetake.ssh' version '1.5.0'
+  id 'java'
+}
+
+// global variable for build status
+ext.build_failed = false
+
+// get the cluster connection details
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/connection.properties"))
+
+// extract BigInsights hostname from the gateway url
+def matcher = props.gateway =~ /^(https?:\/\/)([^:^\/]*):(\d*)?(.*)?.*$/
+
+def mastermanager_hostname = matcher[0][2]
+
+def mastermanager_port = matcher[0][3]
+
+// setup the connection details for ssh
+remotes {
+    bicluster {
+       host = mastermanager_hostname
+       user = props.username
+       password = props.password
+    }
+
+    def bigsql_head = getMasters(props)['BIGSQL_HEAD']?.get(0)
+    if (bigsql_head) {
+        // we use ssh (scp) to download the jdbc libraries needed to connect to dashDB
+        bicluster_bigsql_head {
+           host = bigsql_head
+           user = props.username
+           password = props.password
+        }
+    }
+}
+
+ssh.settings {
+    if (props.known_hosts == 'allowAnyHosts') {
+        // disable ssh host key verification 
+        knownHosts = allowAnyHosts
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+task('DeleteTruststores') << {
+
+    def truststoreCount = 0
+    new File('.').eachFileRecurse(FILES) {
+        if (it.name == 'truststore.jks') {
+            println ">> ${it}"
+            truststoreCount++
+        }
+    }
+
+    if (truststoreCount == 0) {
+        println "No truststores found"
+    } else {
+        println "Confirm you would like to delete the above truststores (y|n)"
+        if (System.console().readLine().toLowerCase() == 'y') {
+            new File('.').eachFileRecurse(FILES) {
+                if (it.name == 'truststore.jks') {
+                    it.delete()
+                }
+            }
+        } 
+    }
+}
+
+task('DownloadCertificate') << {
+
+    def host = mastermanager_hostname
+    def port = mastermanager_port
+    def certs = []
+
+    def trustManager = [
+        checkClientTrusted: { chain, authType ->  },
+        checkServerTrusted: { chain, authType -> certs.push(chain[0]) },
+        getAcceptedIssuers: { null }
+    ] as X509TrustManager
+
+    def context = SSLContext.getInstance("TLS")
+    context.init(null, [trustManager] as TrustManager[], null)
+    context.socketFactory.createSocket(host, port as int).with {
+        addHandshakeCompletedListener( 
+            [ 
+                handshakeCompleted: { event -> certs.addAll(event.getPeerCertificates()) }   
+            ] as HandshakeCompletedListener
+        )
+        startHandshake()
+        close()
+    }
+
+    (new File("${projectDir}/certificate")).text = 
+               "-----BEGIN CERTIFICATE-----\n" + 
+               "${certs[0].encoded.encodeBase64(true)}" +
+               "-----END CERTIFICATE-----"
+}
+
+////////////////////////////////////////////////////////////////////////////////
+ext.gradleVersion = '2.9'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = gradleVersion
+}
+
+// utility task to setup wrapper in top level project and sub projects
+task setupWrapper (dependsOn: wrapper) << {
+
+    new File("${projectDir}/examples").traverse( maxDepth: 0, type: groovy.io.FileType.DIRECTORIES ){ dir ->
+        println "Wrapping examples directory ${dir.absolutePath}"
+        exec {
+            workingDir dir
+            commandLine "${projectDir}/gradlew", "wrapper", "--gradle-version", gradleVersion
+        }
+    }
+}
+////////////////////////////////////////////////////////////////////////////////
+
+def isURLValid(url) {
+    try {
+        new URL(url)
+            return true
+    } catch (MalformedURLException e) {
+        return false
+    }
+} 
+
+def getMasters(props) {
+    return getMasters(props.ambariUrl, props.ambariUsername, props.ambariPassword)
+}
+
+def getMasters(ambariUrl, ambariUsername, ambariPassword) {
+
+    assert isURLValid(ambariUrl) : "Could not find ambariUrl in connection.properties"
+    assert ambariUsername : "Could not find ambariUsername in connection.properties"
+    assert ambariPassword : "Could not find ambariPassword in connection.properties"
+
+
+    def client = new RESTClient( ambariUrl )
+    client.ignoreSSLIssues()
+
+    client.headers['Authorization'] = 'Basic ' + "$ambariUsername:$ambariPassword".getBytes('iso-8859-1').encodeBase64()
+    client.headers['X-Requested-By'] = 'ambari'
+
+    // Make REST call to get clusters
+    def resp = client.get( path : 'api/v1/clusters' )
+
+    assert resp.status == 200  // HTTP response code; 404 means not found, etc.
+
+    // Parse output to JSON
+    def jsonSlurper = new JsonSlurper()
+    def object = jsonSlurper.parseText(resp.data.text)
+
+    // Get Cluster Name
+    def clusterName = object.items.Clusters[0].cluster_name
+
+    // println "Clustername: ${clusterName}"
+
+    // Define service and corresponding master components
+    def services = [
+       'BIGSQL':'BIGSQL_HEAD',
+       'KNOX':'KNOX_GATEWAY',
+       'HIVE':'HIVE_SERVER',
+    ]
+
+    def masterMap = [:]
+    services.each { service_name, component_name ->
+
+       // println "Looking up service [${service_name}] component [${component_name}] on ${clusterName}"
+
+       try {
+           // Make REST to get compoent info
+           def respComponent = client.get( path : 'api/v1/clusters/' + clusterName + '/services/' + service_name + '/components/' + component_name )
+
+           assert respComponent.status == 200  // HTTP response code; 404 means not found, etc.
+
+           // Get hostname
+           def object_component = jsonSlurper.parseText(respComponent.data.text)
+
+           masterMap[component_name] = object_component.host_components.HostRoles.host_name
+        } catch (Exception e) {
+           // ignore
+        }
+    }
+    return masterMap
+}
+
+task('clean') << {
+    delete './lib'
+}
+
+task('DownloadJdbcJars') {
+
+    // if running this task with clean, ensure clean runs first
+    mustRunAfter clean 
+
+    doLast {
+    
+        def bigsql_head = getMasters(props)['BIGSQL_HEAD']
+        
+        ssh.run {
+            if (bigsql_head) {
+                def libdir = '/usr/ibmpacks/current/bigsql/db2/java'
+                session(remotes.bicluster_bigsql_head) {
+
+                    get from: "${libdir}/db2jcc.jar",
+                        into: "${projectDir}/downloads/db2jcc.jar"
+                    
+                    get from: "${libdir}/db2jcc4.jar",
+                        into: "${projectDir}/downloads/db2jcc4.jar"
+
+                    get from: "${libdir}/db2jcc_license_cu.jar",
+                        into: "${projectDir}/downloads/db2jcc_license_cu.jar"
+                }
+            } else {
+                def libdir = '/usr/iop/current/sqoop-client/lib'
+                session(remotes.bicluster) {
+
+                    get from: "${libdir}/db2jcc.jar",
+                        into: "${projectDir}/downloads/db2jcc.jar"
+                    
+                    get from: "${libdir}/db2jcc4.jar",
+                        into: "${projectDir}/downloads/db2jcc4.jar"
+                }
+            }
+        }
+
+        if (!file("${projectDir}/downloads/db2jcc.jar").exists() ||
+            !file("${projectDir}/downloads/db2jcc4.jar").exists()) {
+
+            println "Unable to download db2jcc.jar, db2jcc4.jar from the cluster\n"
+            println "Maybe this is a basic cluster?  If so, manually obtain the above files and place them in the downloads folder"
+        }
+    }
+}
+
+task('DownloadLibs') {
+    dependsOn DownloadJdbcJars
+}
+////////////////////////////////////////////////////////////////////////////////
+
+// verify Ssh connectivity by attempting a SSH session
+
+task verifySshConnectivity << {
+
+    try {
+        ssh.run {
+            session(remotes.bicluster) {
+                execute "echo successfully connected to mastermanager host over ssh"
+            }
+        }
+    } catch (JSchException e) {
+        if (!System.getenv().TRAVIS) {
+            System.err.println "** SSH error: ${e.message} - some tests will fail **"
+            System.err.println "   Resolution: ssh into ${mastermanager_hostname} or set known_hosts:allowAnyHosts in connection.properties"
+        }
+    }
+
+    def bigsql_head = getMasters(props)['BIGSQL_HEAD']?.get(0)
+    if (bigsql_head) {
+        try {
+            ssh.run {
+                session(remotes.bicluster_bigsql_head) {
+                    execute "echo successfully connected to bigsql_head over ssh"
+                }
+            }
+        } catch (JSchException e) {
+            if (!System.getenv().TRAVIS) {
+                System.err.println "** SSH error: ${e.message} - some tests will fail **"
+                System.err.println "   Resolution: ssh into ${bigsql_head} or set known_hosts:allowAnyHosts in connection.properties"
+            }
+        }
+    }
+}
+
+task verifyCertificate << {
+
+    def certfile = file('./certificate')
+
+    if (!certfile.exists()) {
+        System.err.println "** ${certfile.absolutePath} not found - some tests will fail **"
+        System.err.println "   Resolution: run `./gradlew DownloadCertificate`"
+        return
+    }
+
+    def host = mastermanager_hostname
+    def port = 9443
+    def cert
+
+    def certtext
+
+    def trustManager = [
+        checkClientTrusted: { chain, authType ->  },
+        checkServerTrusted: { chain, authType -> cert = chain[0] },
+        getAcceptedIssuers: { null }
+    ] as X509TrustManager
+
+    def context = SSLContext.getInstance("TLS")
+    context.init(null, [trustManager] as TrustManager[], null)
+    context.socketFactory.createSocket(host, port as int).with {
+        startHandshake()
+        close()
+    }
+
+    certtext = "-----BEGIN CERTIFICATE-----\n" + \
+               "${cert.encoded.encodeBase64(true)}\n" + \
+               "-----END CERTIFICATE-----"
+
+    def certfiletext = certfile.text
+
+    if (certtext.replaceAll("\\s", "") != certfiletext.replaceAll("\\s", "")) {
+        System.err.println "** Certificate error:  SSL Certificate of server does not match ${certfile.absolutePath} - some tests will fail **"
+        System.err.println "   Resolution: run `./gradlew DownloadCertificate`"
+    }
+}
+
+task verifyConfig(dependsOn: [verifyCertificate, verifySshConnectivity]) << {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// Methods and task to pretty print cluster info
+
+def termWidth() {
+    // jline doesn't play nicely on some windows machines
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        return 80
+    } else {
+        try {
+            return  jline.TerminalFactory.get().getWidth()
+        } catch (Exception e) {
+            return 80
+        }
+    }
+}
+
+def printSep() {
+    println "-" * termWidth()
+}
+
+def printCenter(text) {
+    print " " * ((termWidth() / 2) - (text.length()/2)) 
+    println text
+}
+
+task('ClusterDetails') {
+
+    if (!System.getenv().TRAVIS) {
+        printSep()
+        printCenter("\033[1mCLUSTER DETAILS\033[0m")
+        printSep()
+        println "Ambari URL          :  https://${mastermanager_hostname}:9443/"
+        println "BigInsights URL     :  https://${mastermanager_hostname}:8443/gateway/default/BigInsightsWeb/index.html"
+        println "YARN URL            :  https://${mastermanager_hostname}:8443/gateway/yarnui/yarn/apps"
+        println "HDFS Explorer URL  :  https://${mastermanager_hostname}:8443/gateway/default/hdfs/explorer.html"
+        println "Master Mgr SSH URL  :  ssh://${props.username}@${mastermanager_hostname}"
+
+        def bigsql_head = getMasters(props)['BIGSQL_HEAD']?.get(0)
+        if (bigsql_head) {
+        println "BigSQL Host SSH URL :  ssh://${props.username}@${bigsql_head}"
+        }
+        println ""
+        println "                       * cmd+click or ctrl+click on one of the above links will open a browser or ssh session in most terminals *"
+        printSep()
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// methods and tasks to test (build) example projects
+
+task('QueryAmbariServices') {
+
+    def ambariUrl =  props.ambariUrl
+    def ambariUser = props.ambariUsername
+    def ambariPassword = props.ambariPassword
+
+    def client = new RESTClient( ambariUrl )
+    client.ignoreSSLIssues()
+
+    client.headers['Authorization'] = 'Basic ' + "$ambariUser:$ambariPassword".getBytes('iso-8859-1').encodeBase64()
+    client.headers['X-Requested-By'] = 'ambari'
+
+    // Make REST call to get clusters
+    def resp = client.get( path : 'api/v1/clusters' )
+
+    assert resp.status == 200  // HTTP response code; 404 means not found, etc.
+
+    // Parse output to JSON
+    def jsonSlurper = new JsonSlurper()
+    def object = jsonSlurper.parseText(resp.data.text)
+
+    // Get Cluster Name
+    def clusterName = object.items.Clusters[0].cluster_name
+
+    // Make REST to get services
+    def respServices = client.get( path : 'api/v1/clusters/' + clusterName + '/services' )
+
+    assert respServices.status == 200  // HTTP response code; 404 means not found, etc.
+
+    // Get services
+    def object_services = jsonSlurper.parseText(respServices.data.text)
+
+    def object_service_list = []
+    def object_service_list_state = []
+    object_services.items.eachWithIndex { serviceName,  index ->
+        object_service_list << serviceName.ServiceInfo.service_name
+
+        def respServiceInfo = client.get( path : 'api/v1/clusters/' + clusterName + "/services/" + serviceName.ServiceInfo.service_name )
+
+        def objectServiceInfo = jsonSlurper.parseText(respServiceInfo.data.text)
+        def serviceState = objectServiceInfo.ServiceInfo.state
+        def criticalAlert = objectServiceInfo.alerts_summary.CRITICAL
+        def warningAlert = objectServiceInfo.alerts_summary.WARNING
+
+        object_service_list_state << ['name':serviceName.ServiceInfo.service_name, 'state':serviceState, 'critical':criticalAlert, 'warning':warningAlert]
+
+    }
+
+    project.ext.set('ambari_services',  object_service_list)
+}
+
+def buildProject(proj, services=[]) {
+    
+    if (!project.ext.get('ambari_services').containsAll(services)) {
+        println "Test skipped ${proj} [Required service(s) '${services.join(', ')}' not installed]"
+    } else {
+
+        if (project.hasProperty('summaryOutput')) {
+            buildProjectSummary(proj, services=[])
+        } else {
+            buildProjectDetailed(proj, services=[])
+        }
+    }
+}
+
+def buildProjectSummary(proj, services=[]) {
+
+    try {
+        GradleRunner.create()
+                .withProjectDir(file("./examples/${proj}/"))
+                .withArguments('clean')
+                .build()
+    } catch (Exception e) {
+        // noop - some projects don't have clean tasks
+    }
+
+    try {
+        FileWriter writer = new FileWriter("build/test/${proj}.txt")
+
+        GradleRunner.create()
+                .withProjectDir(file("./examples/${proj}/"))
+                .forwardStdError(writer)
+                .forwardStdOutput(writer)
+                .withArguments(['Example', '-PdebugExample'])
+                .build()
+
+        writer.close()
+
+    } catch (Exception e) { 
+        println "Test failed  ${proj}"
+        return
+    }
+
+    println "Test passed  ${proj}"
+}
+
+def buildProjectDetailed(proj, services=[]) {
+
+
+    def subTasks = ProjectBuilder.builder()
+                .withProjectDir(file("./examples/${proj}/"))
+                .build()    
+                .getTasksByName("Example", false).first()
+                .getDependsOn()
+
+    subTasks.each { subTask ->
+
+        // ensure we have a clean environment for each test
+        try {
+            GradleRunner.create()
+                    .withProjectDir(file("./examples/${proj}/"))
+                    .withArguments('clean')
+                    .build()
+        } catch (Exception e) {
+            // noop - some projects don't have clean tasks
+        }
+
+        if (!(subTask instanceof org.gradle.api.Task)) {
+            // if this isn't a task, continue looping
+            return false
+        }
+
+        // do we need to skip this test?
+        def tests_to_skip = System.getenv().TESTS_TO_SKIP?.split(',')
+        if (tests_to_skip && tests_to_skip.contains("${proj}")) {
+            println "Test skipped ${proj}::${subTask.name} - skipped because TESTS_TO_SKIP variable contains '${proj}'"
+            return
+        }
+        if (tests_to_skip && tests_to_skip.contains("${proj}::${subTask.name}")) {
+            println "Test skipped ${proj}::${subTask.name} - skipped because TESTS_TO_SKIP variable contains '${proj}::${subTask.name}'"
+            return
+        }
+
+        try {
+            FileWriter writer = new FileWriter("build/test/${proj}-${subTask.name}.txt")
+            GradleRunner.create()
+                    .withProjectDir(file("./examples/${proj}/"))
+                    .forwardStdError(writer)
+                    .forwardStdOutput(writer)
+                    .withArguments([subTask.name, '-PdebugExample'])
+                    .build()
+            writer.close()
+        } catch (Exception e) { 
+            println "Test failed  ${proj}::${subTask.name}"
+            project.build_failed = true
+            return
+        }
+        println "Test passed  ${proj}::${subTask.name}"
+    }
+}
+
+task testSetup() {
+
+    dependsOn verifyConfig, DownloadLibs
+
+    delete('build')
+    mkdir('build/test')
+}
+
+
+task baseTest(dependsOn: testSetup) << {
+
+    if (!project.hasProperty('summaryOutput')) {
+        println "Running with detailed test output (for summary output, run gradle with -PsummaryOutput)"
+    }
+
+    println "Running base tests"
+
+    [
+      'Ambari':[],
+      'WebHdfsGroovy':['KNOX'],
+      'WebHdfsCurl':['KNOX'],
+      'HiveGroovy':['HIVE'],
+      'HiveJava':['HIVE'],
+      'SparkWordCount':['SPARK'],
+      'SparkStreamingPythonSsh':['SPARK'],
+      'ObjectStoreIntegrationWithSpark':['SPARK'],
+      'CloudantIntegrationWithSpark':['SPARK'],
+      'ElasticsearchIntegrationWithSpark':['SPARK'],
+      'DashDBIntegrationWithSpark':['SPARK'],
+      'DashDBIntegrationWithBigSQL':['BIGSQL'],
+      'HBaseGroovy':['KNOX', 'HBASE'],
+      'HBaseJava':['KNOX', 'HBASE'],
+      'BiginsightsHome':['BIGSQL'],
+      // These will not be fixed until 4.2:
+      //'OozieWorkflowMapReduce':['KNOX', 'OOZIE', 'MAPREDUCE2'],
+      //'OozieWorkflowSpark':['KNOX', 'OOZIE', 'SPARK'],
+      //'OozieWorkflowCurl':['KNOX', 'OOZIE', 'MAPREDUCE2'],
+      //'WebHCatGroovy':['KNOX', 'MAPREDUCE2', 'PIG', 'HIVE'],
+    ]
+    .each() { proj, service -> buildProject(proj, service) }
+
+    // These examples are interactive so aren't easy to automate
+    [
+      'HiveBeeline',
+      'Knoxshell',
+      'Jsqsh',
+    ]
+    .each() { 
+        println "Test skipped ${it} [interactive examples are not tested]"
+    }
+  
+    /* 
+    // examples not implemented due to upstream dependencies not being met 
+    [
+      'Flume',
+      'Sqoop',
+      'Solr',
+      'Kafka',
+    ]
+    .each() { 
+        println "Test skipped ${it} [example not implemented due to known issue with BIoC clusters]"
+    }
+    */
+}
+
+// TODO split this by module
+task xTest(dependsOn: baseTest) << {
+
+    println "Running BigX tests"
+
+    [
+      'BigR':['BIGR'], 
+      'BigSQLGroovy':['BIGSQL'], 
+      'BigSQLJava':['BIGSQL'],
+    ]
+    .each() { proj, service -> buildProject(proj, service) }
+}
+
+task test(dependsOn: xTest, overwrite: true) << {
+
+    if (project.build_failed) {
+        throw new GradleException("One or more tests failed.")
+    }
+    println "Finished running tests."
+    println "*** Test output can be found in '${projectDir}/build/test/' ***"
+}
+
+task check(dependsOn: test, overwrite: true) << {
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+task ssh(type: Exec) {
+    if (!System.getenv().TRAVIS) {
+        println "***"
+        println "TIP: enable passwordless ssh by running, either of the following commands:"
+        println ""
+        println "  `ssh-copy-id ${props.username}@${mastermanager_hostname}` or"
+        println "  `cat ~/.ssh/id_rsa.pub | ssh ${props.username}@${mastermanager_hostname} 'cat >> ~/.ssh/authorized_keys'`"
+        println "***"
+        standardInput = System.in
+        standardOutput = System.out
+        commandLine "ssh", "-t", "-t", "${props.username}@${mastermanager_hostname}"
+    }
+}
+
+

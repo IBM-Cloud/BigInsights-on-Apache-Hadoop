@@ -1,0 +1,131 @@
+// set the dependencies for running the groovy script
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.codehaus.groovy:groovy-all:2.0.5'
+        classpath 'org.apache.knox:gateway-shell:0.8.0'
+    }
+}
+
+plugins {
+  id 'groovy'
+  id 'org.hidetake.ssh' version '1.5.0'
+}
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+// get the cluster connection details
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+// set the dependencies for compiling the groovy script
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.0.5'
+    compile 'org.apache.knox:gateway-shell:0.8.0'
+    // include the bigsql jar files
+    runtime fileTree(dir: 'lib', include: '*.jar')
+}
+
+// tell gradle the groovy script is in the same folder as the build.gradle file
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['.']
+        }
+    }
+}
+
+clean {
+    delete './lib'
+    delete './truststore.jks'
+}
+
+task ('CreateTrustStore', type:Exec) {
+
+    // this build step will fail if we try to import the certificate into an existing truststore
+    delete './truststore.jks'
+
+    // ensure the ssl certificate exists
+    if (!file("${projectDir}/../../certificate").exists()) {
+        throw new GradleException("'certificate' file could not be found in ${projectDir.parentFile.parentFile}")
+    }
+
+    // import the BigInsights manager certificate
+    commandLine "keytool -import -trustcacerts -alias biginsights -file ${projectDir}/../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt".split()
+}
+
+// Create helper scripts
+task ('SetupFederation') {
+
+    def hostIP, hostPort, keyPassword, certificate
+
+    project.hasProperty('dashIP') ? (hostIP = dashIP) : (hostIP = props.dashIP)
+    project.hasProperty('dashPort') ? (hostPort = dashPort) : (hostPort = props.dashPort)
+    project.hasProperty('kdbPassword') ? (keyPassword = kdbPassword) : (keyPassword = 'myCli3ntPassw0rd')
+    project.hasProperty('dashDBCertificate') ? (certificate = dashDBCertificate) : (certificate = 'DigiCertGlobalRootCA.crt')
+
+    mkdir ('scripts')
+
+    def certificateFile = '/home/bigsql/sqllib/security/keystore/' + certificate
+
+    def configSsl = """# Create keystore db
+cd /home/bigsql/sqllib/security/keystore
+/home/bigsql/sqllib/gskit/bin/gsk8capicmd_64 -keydb -create -db "dashclient.kdb" -pw "${keyPassword}" -stash
+/home/bigsql/sqllib/gskit/bin/gsk8capicmd_64 -cert -add -db "dashclient.kdb" -pw "${keyPassword}" -label "DigiCert" -file "${certificateFile}" -format ascii -fips
+
+# Update database manager configuration to use key and stash file
+db2 update dbm cfg using SSL_CLNT_KEYDB /home/bigsql/sqllib/security/keystore/dashclient.kdb
+db2 update dbm cfg using SSL_CLNT_STASH /home/bigsql/sqllib/security/keystore/dashclient.sth"""
+
+    def catalogDb = """# Uncatalog if needed
+db2 UNCATALOG DATABASE BLUDB
+db2 UNCATALOG NODE DASHNODE
+
+# Catalog the remote server
+db2 CATALOG TCPIP NODE DASHNODE REMOTE ${hostIP} SERVER ${hostPort} SECURITY SSL
+
+# Catalog the remote database
+db2 CATALOG DATABASE BLUDB AS BLUDB AT NODE DASHNODE"""
+
+    file('scripts/configSSL.sh').text = configSsl
+    file('scripts/catalogDB.sh').text = catalogDb
+}
+
+// task to run groovy script
+['Connect', 'Insert', 'Load', 'CreateExternal', 'CreateCsv', 'Hbase', 'Federation'].each { taskName ->
+   task "$taskName" (type: JavaExec) {
+
+      // if running this task with clean, ensure clean runs first
+      mustRunAfter clean 
+
+      dependsOn CreateTrustStore
+      dependsOn SetupLibs
+
+      environment 'gateway',  props.gateway
+      environment 'hostname', getMasters(props)['BIGSQL_HEAD'][0]
+      environment 'username', props.username
+      environment 'password', props.password
+      environment 'dashUser', props.dashUser
+      environment 'dashPassword', props.dashPassword
+      environment 'dashHost', props.dashHost
+      environment 'dashPort', props.dashPort
+
+      main = taskName
+      classpath = sourceSets.main.runtimeClasspath
+   }
+}
+
+// Disable task if some props not set
+( props.dashHost =~ /changeme/ || props.dashHost == null ) ? ( Federation.enabled = false ) : ( Federation.enabled = true )
+
+// Main example task
+task('Example') {
+     dependsOn Connect, Insert, Load, Hbase, CreateExternal, CreateCsv, Federation
+}

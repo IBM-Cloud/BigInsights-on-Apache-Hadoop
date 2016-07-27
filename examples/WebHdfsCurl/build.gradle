@@ -1,0 +1,24 @@
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+// task to run the bash script
+['Ls', 'Mkdir', 'Put'].each { taskName ->
+   task "$taskName" (type: Exec) {
+
+    environment 'gateway', props.gateway
+    environment 'username', props.username
+    environment 'password', props.password
+
+    commandLine "bash", "${taskName}.sh"
+   }
+}
+
+task('Test') {
+    dependsOn Ls, Mkdir, Put
+}
+
+// this test will be removed when tests uses Test target
+task('Example') {
+    dependsOn Ls, Mkdir, Put
+}

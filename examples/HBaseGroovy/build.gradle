@@ -1,0 +1,59 @@
+apply plugin: 'groovy'
+
+// set the dependencies for running the groovy script
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.codehaus.groovy:groovy-all:2.0.5'
+        classpath 'org.apache.knox:gateway-shell:0.8.0'
+    }
+}
+
+// set the dependencies for compiling the groovy script
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.0.5'
+    compile 'org.apache.knox:gateway-shell:0.8.0'
+}
+
+// tell gradle the groovy script is in the same folder as the build.gradle file
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['.']
+        }
+
+        // switch on debug output with ./gradlew Example -PdebugExample
+        if (project.hasProperty('debugExample')) {
+            resources {
+               srcDirs = ['resources']
+            }
+        }
+    }
+}
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+
+// task to run groovy script
+['Connect', 'CRUD'].each { taskName ->
+   task "$taskName" (type: JavaExec) {
+
+    environment 'gateway', props.gateway
+    environment 'username', props.username
+    environment 'password', props.password
+
+    main = taskName
+    classpath = sourceSets.main.runtimeClasspath
+   }
+}
+
+task('Example') {
+    dependsOn Connect, CRUD
+}

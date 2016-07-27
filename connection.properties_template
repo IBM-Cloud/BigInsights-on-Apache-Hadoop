@@ -1,0 +1,127 @@
+
+################################################################################
+# BigInsights cluster
+################################################################################
+
+###### cluster gateway and credentials ######
+
+# These properties are required
+
+# E.g. gateway:https://bi-hadoop-prod-4066.services.dal.bluemix.net:8443/gateway/default
+# Important!  ensure you use a domain name and not an IP address for the host
+
+gateway:https://changeme:8443/gateway/default
+
+# E.g. username:biadmin
+username:changeme
+password:changeme
+
+###### ambari url and credentials ######
+
+# These properties are required
+
+# the ambari host name is usually the same as the gateway host name
+ambariUrl:https://changeme:9443/api
+
+# the ambari username and password are usually the same as those for the gateway
+# E.g. ambariUsername:biadmin
+ambariUsername:changeme
+ambariPassword:changeme
+
+###### strict ssh host key checking ######
+
+# uncomment known_hosts to disable strict ssh host key checking
+# WARNING: uncommenting may make you vulnerable to man-in-the-middle attacks
+
+# known_hosts:allowAnyHosts
+
+# IMPORTANT: if you don't want to disable ssh host key checking, you will need to
+# ssh into your mastermanager node (and other BigInsight nodes) and accept 
+# the certificate fingerprint presented to you by the ssh client
+
+################################################################################
+# Push to Cloudant with Spark Example : Destination Cloudant store details
+################################################################################
+
+# These properties are optional
+
+cl_push_hostname:changeme.cloudant.com
+cl_push_username:changeme
+cl_push_password:changeme
+
+################################################################################
+# Pull from dashDB with Spark Example : Source dashDB details
+################################################################################
+
+# This property is optional
+
+dashdb_pull_jdbc_url:jdbc:db2://changeme:50001/BLUDB:user=changeme;password=changeme;sslConnection=true;
+
+################################################################################
+# Push to dashDB with Spark Example : Destination dashDB details
+################################################################################
+
+# This property is optional
+
+dashdb_push_jdbc_url:jdbc:db2://changeme:50001/BLUDB:user=dash6590;password=SPbOJTC8wVhm;sslConnection=true;
+
+################################################################################
+# Spark Object Store Integration Example : object store details
+################################################################################
+
+# These properties are optional
+
+### auth url ###
+
+# SoftLayer           > E.g. https://dal05.objectstorage.softlayer.net/auth/v1.0/
+# Bluemix Keystone V3 > https://identity.open.softlayer.com/v3/auth/tokens
+objectstore_auth_url:https://identity.open.softlayer.com/v3/auth/tokens
+
+### tenant ###
+
+# SoftLayer           > tenant (take the part before the ':' in the username in account credentials) 
+# Bluemix Keystone V3 > use project_id
+objectstore_tenant:changeme
+
+### username ###
+
+# SoftLayer           > username (take the part after the ':' in the username in account credentials) 
+# Bluemix Keystone V3 > user_id
+objectstore_username:changeme
+
+### password ###
+
+# SoftLayer           > API key
+# Bluemix Keystone V3 > Password
+objectstore_password:changeme
+
+### region ###
+
+# SoftLayer           > E.g. dal05
+# Bluemix Keystone V3 > dallas
+objectstore_region:dallas
+
+### auth method ###
+
+# SoftLayer           > swiftauth
+# Bluemix Keystone V3 > keystoneV3
+objectstore_auth_method:keystoneV3
+
+################################################################################
+# Elasticsearch Integration Example : elasticsearch host details
+################################################################################
+#
+elasticsearch_host:changeme
+elasticsearch_port:changeme
+elasticsearch_user:changeme
+elasticsearch_pass:changeme
+
+
+################################################################################
+# Big SQL Federation Example : dashdb host details
+################################################################################
+dashUser:changeme
+dashPassword:changeme
+dashHost:changeme
+dashPort:changeme
+

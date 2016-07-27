@@ -1,0 +1,14 @@
+connection.properties
+connection.properties.*
+certificate
+certificate.*
+build/
+.gradle/
+samples/
+.vagrant/
+*.swp
+**/userHome/
+**/.DS_Store
+.idea/
+secrets.tar
+bin/

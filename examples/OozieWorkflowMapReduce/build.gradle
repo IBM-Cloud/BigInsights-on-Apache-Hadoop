@@ -1,0 +1,64 @@
+apply plugin: 'groovy'
+apply plugin: 'java'
+
+// set the dependencies for running the groovy script
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.codehaus.groovy:groovy-all:2.0.5'
+        classpath 'org.apache.knox:gateway-shell:0.8.0'
+    }
+}
+
+// set the dependencies for compiling the groovy script and mapreduce classes
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.0.5'
+    compile 'org.apache.knox:gateway-shell:0.8.0'
+    // compile MapReduce class
+    compile(group: 'org.apache.hadoop', name: 'hadoop-common', version:'2.2.0') { }
+    compile(group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version:'2.2.0') { }
+}
+
+// tell gradle the groovy script is in the same folder as the build.gradle file
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['.']
+        }
+        // uncomment to enable http debugging
+        // run './gradlew clean' after commenting/uncommenting
+        resources {
+        //   srcDirs = ['resources']
+        }
+    }
+}
+
+// MapReduce classes
+jar {
+    archiveName = 'hadoop-examples.jar'
+    destinationDir = file('samples')
+}
+
+// task to run the groovy script
+task('OozieMapReduce', dependsOn:'jar', type: JavaExec) {
+
+    Properties props = new Properties()
+    props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+    environment 'gateway', props.gateway
+    environment 'username', props.username
+    environment 'password', props.password
+
+    main = 'Example'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task('Example') {
+    dependsOn OozieMapReduce
+}
