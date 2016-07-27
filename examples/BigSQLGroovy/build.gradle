@@ -39,6 +39,11 @@ sourceSets {
         groovy {
             srcDirs = ['.']
         }
+        // You can update log4j.properties under resources directory
+        // to set logging level e.g. DEBUG
+        resources {
+           srcDirs = ['resources']
+        }
     }
 }
 
