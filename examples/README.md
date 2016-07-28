@@ -39,6 +39,12 @@ This page lists all of the examples.
 
 *********************************************************************
 
+#### Zeppelin
+
+- Install, configure and run Zeppelin. Run a Pyspark notebook  [[Zeppelin](./Zeppelin/README.md)]
+
+*********************************************************************
+
 More examples coming soon ...
 
 *********************************************************************

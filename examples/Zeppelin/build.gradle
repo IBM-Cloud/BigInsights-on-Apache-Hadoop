@@ -1,0 +1,98 @@
+plugins {
+  // ssh plugin documentation: https://gradle-ssh-plugin.github.io/docs/
+  id 'org.hidetake.ssh' version '1.5.0'
+}
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+// get the cluster connection details
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+def ZEPPELIN='zeppelin-0.6.0-bin-all'
+
+
+task Uninstall << {
+    ssh.run {
+        // remotes.bicluster is defined in shared/common-helpers.gradle
+        session(remotes.bicluster) {
+            try {
+                // initialise kerberos
+                execute "kinit -k -t ${props.username}.keytab ${props.username}@IBM.COM"
+            } 
+            catch (Exception e) {
+                println "problem running kinit - maybe this is a Basic cluster?"
+            }
+            put from: "${projectDir}/zeppelin_uninstall.sh", 
+                into: "./zeppelin_uninstall.sh"
+
+            put from: "${projectDir}/Pyspark_Test.json", 
+                into: "./Pyspark_Test.json"
+
+            execute "bash ./zeppelin_uninstall.sh"
+        }
+    }
+}
+
+task Install << {
+    ssh.run {
+        // remotes.bicluster is defined in shared/common-helpers.gradle
+        session(remotes.bicluster) {
+            try {
+                // initialise kerberos
+                execute "kinit -k -t ${props.username}.keytab ${props.username}@IBM.COM"
+            } 
+            catch (Exception e) {
+                println "problem running kinit - maybe this is a Basic cluster?"
+            }
+            put from: "${projectDir}/zeppelin_env.sh", 
+                into: "./zeppelin_env.sh"
+
+            put from: "${projectDir}/zeppelin_install.sh", 
+                into: "./zeppelin_install.sh"
+
+            put from: "${projectDir}/configure_zeppelin_interpreters.py", 
+                into: "./configure_zeppelin_interpreters.py"
+
+            execute "bash ./zeppelin_install.sh"
+        }
+    }
+}
+
+task Run << {
+
+    def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
+
+    def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
+    def zeppelin_port = matcher[0][1]
+
+    ssh.run {
+        session(remotes.bicluster) {
+            
+            // make sure zeppelin is running
+            try {
+                execute "[[ -d ./${ZEPPELIN} ]]"
+            } 
+            catch (Exception e) {
+                throw new GradleException(
+                    "Couldn't find the Zeppelin installation.  Try running './gradlew Install'."
+                    )
+            }
+
+            execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh status || ./${ZEPPELIN}/bin/zeppelin-daemon.sh start"
+ 
+            def port = forwardLocalPort hostPort: zeppelin_port.toInteger()
+            def console = System.console()
+            if (console) {
+                def output = "\n\n" +
+                    "SSH forwarding localhost:${port} -> BigInsights zeppelin localhost:${zeppelin_port}\n" +
+                    "Access zeppelin at: http://localhost:${port}.\n" +
+                    "Press ENTER to quit.\n\n"
+                console.readLine(output)
+            } else {
+                logger.error "Cannot get console."
+            }
+        }
+    }
+}
