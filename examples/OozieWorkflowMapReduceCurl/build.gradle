@@ -1,0 +1,34 @@
+apply plugin: 'java'
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+// set the dependencies for compiling the mapreduce classes
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // compile MapReduce class
+    compile(group: 'org.apache.hadoop', name: 'hadoop-common', version:'2.2.0') { }
+    compile(group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version:'2.2.0') { }
+}
+
+// Jar up the MapReduce classes and save in the samples folder
+jar {
+    archiveName = 'hadoop-examples.jar'
+    destinationDir = file('samples')
+}
+
+task('Example', dependsOn:'jar', type: Exec) {
+
+    environment 'gateway', props.gateway
+    environment 'username', props.username
+    environment 'password', props.password
+
+    if (project.hasProperty('debugExample')) {
+        commandLine "bash", "-x", "MapReduce.sh"
+    } else {
+        commandLine "bash", "MapReduce.sh"
+    }
+}

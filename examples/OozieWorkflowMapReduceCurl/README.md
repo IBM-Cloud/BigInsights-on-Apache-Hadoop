@@ -4,10 +4,13 @@ This example shows how to compile a Java Map/Reduce program and programmatically
 
 This example uses [Apache Oozie](https://oozie.apache.org/) to run and monitor the Map/Reduce job.  Oozie is a workflow scheduler system to manage Apache Hadoop jobs.
 
-BigInsights for Apache Hadoop clusters are secured using [Apache Knox](https://knox.apache.org/).  Apache Knox is a REST API Gateway for interacting with Apache Hadoop clusters.  The Apache Knox project provides a [Java client library](https://cwiki.apache.org/confluence/display/KNOX/Client+Usage) and this can be used for interacting with the Oozie REST API.  Using a library is usally more productive because the library provides a higher level of abstraction than when working directly with the REST API.
+BigInsights for Apache Hadoop clusters are secured using [Apache Knox](https://knox.apache.org/).  Apache Knox is a REST API Gateway for interacting with Apache Hadoop clusters.  
+
+This example uses [cURL](https://curl.haxx.se/) to interact with the REST API. This is useful for developers to understand the REST API so they can emulate the REST calls using their programming language features.
 
 See also:
 
+- [Oozie Map/Reduce Groovy Example](../OozieWorkflowMapReduceGroovy/README.md)
 - [Oozie Map/Reduce Cookbook](https://cwiki.apache.org/confluence/display/OOZIE/Map+Reduce+Cookbook)
 - [BigInsights Apache Knox documentation](https://www.ibm.com/support/knowledgecenter/en/SSPT3X_4.2.0/com.ibm.swg.im.infosphere.biginsights.admin.doc/doc/knox_overview.html)
 - [BigInsights Oozie documentation](https://www.ibm.com/support/knowledgecenter/SSPT3X_4.2.0/com.ibm.swg.im.infosphere.biginsights.product.doc/doc/bi_oozie.html)
@@ -26,14 +29,16 @@ Developers will gain the most from these examples if they are:
 
 ## Example Requirements
 
-You have met the [pre-requisites](../../README.md#pre-requisites) and have followed the [setup instructions](../../README.md#setup-instructions) in the top level [README](../../README.md)
+- You meet the [pre-requisites](../../README.md#pre-requisites) in the top level [README](../../README.md)
+- You have followed the [setup instructions](../../README.md#setup-instructions) in the top level [README](../../README.md)
+- You have bash, cURL, grep, perl, and tr unix tools installed.
 
 ## Run the example
 
 This example consists of three parts:
 
 - [WordCount.java](./src/main/java/org/apache/hadoop/examples/WordCount.java) - Map/Reduce Java code
-- [Example.groovy](./Example.groovy) - Groovy script to submit the Map/Reduce job to Oozie
+- [MapReduce.sh](./MapReduce.sh) - Bash script to submit the Map/Reduce job to Oozie
 - [build.gradle](./build.gradle) - Gradle script to compile and package the Map/Reduce code and execute the Example.groovy script 
 
 To run the example, open a command prompt window:
@@ -44,27 +49,23 @@ To run the example, open a command prompt window:
    - some output from running the command on my machine is shown below 
 
 ```bash
-biginsight-bluemix-docs $ cd examples/OozieWorkflowMapReduce
-biginsight-bluemix-docs/examples/OozieWorkflowMapReduce $ ./gradlew Example
-compileJava
-:compileGroovy
-...
-:processResources
-:classes
-:jar
-:OozieMapReduce
-[Example.groovy] Delete /user/snowch/test: 200
-[Example.groovy] Mkdir /user/snowch/test: 200
-[Example.groovy] Put /user/snowch/test/input/FILE: 201
-[Example.groovy] Put /user/snowch/test/workflow.xml: 201
-[Example.groovy] Put /user/snowch/test/lib/hadoop-examples.jar: 201
-[Example.groovy] Submitted job: 0000005-160721161255658-oozie-oozi-W
-[Example.groovy] Polling up to 60s for job completion...
-[Example.groovy] ...........................
-[Example.groovy] Job status: SUCCEEDED
-[Example.groovy] [_SUCCESS, part-r-00000]
-[Example.groovy] Mapreduce output:
-********************************************************************************
+biginsight-bluemix-docs $ cd examples/OozieWorkflowMapReduceCurl
+biginsight-bluemix-docs/examples/OozieWorkflowMapReduceCurl $ ./gradlew Example
+:compileJava UP-TO-DATE
+:processResources UP-TO-DATE
+:classes UP-TO-DATE
+:jar UP-TO-DATE
+:Example
+Successfully created directory /user/snowch/test-1469804930
+Successfully created directory /user/snowch/test-1469804930/input
+Successfully uploaded workflow-definition.xml
+Successfully uploaded samples/hadoop-examples.jar
+Successfully uploaded LICENSE
+Submitted oozie job. jobid: 0000017-160728151859109-oozie-oozi-W
+status: RUNNING
+status: RUNNING
+status: RUNNING
+status: OK
 "AS 2
 "Contribution"  1
 "Contributor"   1
@@ -80,19 +81,20 @@ compileJava
 your    4
 {name   1
 {yyyy}  1
+HTTP/1.1 200 OK
 
-********************************************************************************
-:Example
+>> MapReduce test was successful.
+
 
 BUILD SUCCESSFUL
 
-Total time: 39.642 secs
+Total time: 47.996 secs
 ```
 
 The output above shows:
 
 - the steps performed by gradle (command names are prefixed by ':' such as :compileJava) 
-- the steps performed by the Example.groovy script (output is prefixed by '[Example.groovy]')
+- the steps performed by the MapReduce.sh script 
 - the Map/Reduce output which is the count of the number of times each word is seen in an Apache 2.0 License file
  
 ## Decomposition Instructions
@@ -101,9 +103,9 @@ The examples uses a gradle build file [build.gradle](./build.gradle) when you ru
 
 - compile the Map/Reduce code.  The `apply plugin: 'java'` statement controls this [more info](https://docs.gradle.org/current/userguide/java_plugin.html).
 - create a Jar file with the compiled Map/Reduce code.  The `jar { ... }` statement controls this [more info](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html).
-- compile and execute the [Example.groovy](./Example.groovy) script.  The `task('OozieMapReduce' ...)` statement controls this [more info](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html)
+- execute the [MapReduce.sh](./MapReduce.sh) script.  The `task('Example' ...)` statement controls this [more info](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.Exec.html)
 
-The [Example.groovy](./Example.groovy) script performs the following:
+The [MapReduce.sh](./MapReduce.sh) script performs the following:
 
 - Create an Oozie workflow XML document
 - Create an Oozie configuration XML document
