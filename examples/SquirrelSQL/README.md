@@ -1,6 +1,6 @@
 ## Overview
 
-BigInsights clusters can be accessed via [jdbc](https://en.wikipedia.org/wiki/Java_Database_Connectivity) using either [Hive](https://hive.apache.org/) or [BigSQL](http://www.ibm.com/support/knowledgecenter/SSPT3X_4.2.0/com.ibm.swg.im.infosphere.biginsights.analyze.doc/doc/bigsql_analyzingbigdata.html).  Hive is available on all BigInsight clusters as part of the [Open Data Platform](https://www.odpi.org/).  BigSQL is a value added extra and is not installed by default on all BigInsights clusters.
+BigInsights clusters can be accessed via [jdbc](https://en.wikipedia.org/wiki/Java_Database_Connectivity) using either [Hive](https://hive.apache.org/) or [BigSQL](http://www.ibm.com/support/knowledgecenter/SSPT3X_4.2.0/com.ibm.swg.im.infosphere.biginsights.analyze.doc/doc/bigsql_analyzingbigdata.html).  Hive is available on all BigInsight clusters as part of the [Open Data Platform](https://www.odpi.org/).  BigSQL is an optional extra for BigInsights clusters.
 
 This example downloads a popular open source SQL client, [SquirrelSQL](http://squirrel-sql.sourceforge.net/) and configures it with connections to access your cluster over Hive and BigSQL (if BigSQL is available on your cluster).
 
@@ -42,10 +42,12 @@ The SquirrelSQL window should be opened for you where you can select Hive and Bi
 
 The examples uses a gradle build file [build.gradle](./build.gradle) when you run `./gradlew` or `gradle.bat`.  The build.gradle does the following:
 
+- Configure a truststore for SSL connectivity to Hive/BigSQL
+- Make the Hive/BigSQL jdbc jar files available for SquirrelSQL
 - Download SquirrelSQL and unzip it
 - Configure SquirrelSQL with your connection details
 - Execute SquirrelSQL
 
-All code is well commented and it is suggested that you browse the build.gradle and *.groovy scripts to understand in more detail how they work.
+All code is well commented and it is suggested that you browse the source code to understand in more detail what they do.
 
 
