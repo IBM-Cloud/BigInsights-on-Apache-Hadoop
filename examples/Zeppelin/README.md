@@ -109,4 +109,4 @@ You should also be able to see the above spark job running on the spark cluster.
 ## Limitations
 
 - current only the spark and bash interpreters are configured
-- currently only basic zeppelin spark configuration is performed: see [zeppelin_install.sh](./zeppelin_install.sh) for details
+- currently only basic zeppelin spark configuration is performed: see [zeppelin_install.sh](./zeppelin_install.sh) for details.  If you would like Hbase support consider voting for this upstream [issue](https://issues.apache.org/jira/browse/ZEPPELIN-1252)
