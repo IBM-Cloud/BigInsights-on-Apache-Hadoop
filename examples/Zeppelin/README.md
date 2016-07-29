@@ -76,24 +76,7 @@ Follow the instructions output by the Run command.
 
 ### Test Zeppelin with Pyspark
 
-First run Zeppelin.  In the brower window, you should see an option for configuring interpreters by clicking on the drop down menu button at the top right of the window:
-
-![Configure Interpreters](./docs/ConfigureInterpreters.png)
-
-- Select Interpreter
-  - Search for 'spark'
-      - Navigate to the 'livy' section
-          - Click edit
-          - Change 'livy.spark.master' to 'yarn-client'
-          - Click Save
-          - Click OK to save and restart the interpreter
-      - Navigate to the 'spark' section
-          - Click edit
-          - Change 'master' to 'yarn-client'
-          - Click Save
-          - Click OK to save and restart the interpreter
-
-Click on the Notebook dropdown menu from the main toolbar and click on the Pyspark Test notebook:
+First run Zeppelin, Then click on the Notebook dropdown menu from the main toolbar and click on the Pyspark Test notebook:
 
 ![Pyspark Test Notebook](./docs/Pyspark_Test.png)
 

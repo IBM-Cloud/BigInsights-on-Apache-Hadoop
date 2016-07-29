@@ -1,5 +1,6 @@
 import groovyx.net.http.RESTClient
 import groovy.json.JsonSlurper
+import static com.jayway.jsonpath.JsonPath.parse
 
 buildscript {
     repositories {
@@ -8,6 +9,7 @@ buildscript {
     dependencies {
         // we need rest + json to configure zeppelin interpreters
         classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+        classpath 'com.jayway.jsonpath:json-path:2.2.0'
     }
 }
 
@@ -48,7 +50,22 @@ task Uninstall << {
     }
 }
 
-def configInterpreters = { port ->
+def configureInterpreter = { port, interpreter ->
+
+    def url = "http://localhost:${port}/"
+
+    def client = new RESTClient( url )
+    def resp = client.put( 
+                    path : "api/interpreter/setting/${interpreter.id}",
+                    body : interpreter,
+                    requestContentType : 'application/json'
+               )
+
+    assert resp.status == 200
+}
+
+// configure the livy and spark interpreters
+def configureInterpreters = { port ->
 
     def url = "http://localhost:${port}/"
 
@@ -57,8 +74,18 @@ def configInterpreters = { port ->
 
     assert resp.status == 200
 
-    resp.data.body.each { interpreter ->
-        println interpreter.id
+    def json = resp.data.body
+
+    json.each { interpreter ->
+
+       if ( interpreter.name == "spark" ) {
+          interpreter.properties['master'] = 'yarn-client'
+          configureInterpreter(port, interpreter) 
+       }
+       if ( interpreter.name == "livy" ) {
+          interpreter.properties['livy.spark.master'] = 'yarn-client'
+          configureInterpreter(port, interpreter) 
+       }
     }
 }
 
@@ -93,7 +120,7 @@ task Install << {
             //       forwarding is available
             sleep(5000)
 
-            configInterpreters(local_port)
+            configureInterpreters(local_port)
 
             // restart zeppelin
             execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh restart"
