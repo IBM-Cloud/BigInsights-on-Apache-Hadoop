@@ -22,8 +22,6 @@ set -e
 # debugging - echo commands as they are executed
 set -x 
 
-# TODO - do we need to run zepplin on a different port for each user so they get their own zeppelin UI?
-
 ZEPPELIN=zeppelin-0.6.0-bin-all
 
 if [[ -d ./${ZEPPELIN} ]]
@@ -57,8 +55,6 @@ source ./${ZEPPELIN}/conf/zeppelin-env.sh
 
 # TODO poll for service by checking with curl
 sleep 30
-
-python ./configure_zeppelin_interpreters.py
 
 curl -X POST http://localhost:${ZEPPELIN_PORT}/api/notebook \
      -H "Content-Type: application/json" \
