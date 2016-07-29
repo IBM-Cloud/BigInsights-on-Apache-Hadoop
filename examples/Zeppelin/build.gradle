@@ -1,3 +1,16 @@
+import groovyx.net.http.RESTClient
+import groovy.json.JsonSlurper
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // we need rest + json to configure zeppelin interpreters
+        classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+    }
+}
+
 plugins {
   // ssh plugin documentation: https://gradle-ssh-plugin.github.io/docs/
   id 'org.hidetake.ssh' version '1.5.0'
@@ -35,7 +48,26 @@ task Uninstall << {
     }
 }
 
+def configInterpreters = { port ->
+
+    def url = "http://localhost:${port}/"
+
+    def client = new RESTClient( url )
+    def resp = client.get( path : 'api/interpreter/setting' )
+
+    assert resp.status == 200
+
+    resp.data.body.each { interpreter ->
+        println interpreter.id
+    }
+}
+
 task Install << {
+    def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
+
+    def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
+    def zeppelin_port = matcher[0][1]
+
     ssh.run {
         // remotes.bicluster is defined in shared/common-helpers.gradle
         session(remotes.bicluster) {
@@ -52,13 +84,23 @@ task Install << {
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
 
-            put from: "${projectDir}/configure_zeppelin_interpreters.py", 
-                into: "./configure_zeppelin_interpreters.py"
-
             execute "bash ./zeppelin_install.sh"
+
+            def local_port = forwardLocalPort hostPort: zeppelin_port.toInteger()
+
+            // FIXME we seem to need to wait for port forwarding to be setup, but
+            //       we should have a better mechanism than sleep for ensuring port
+            //       forwarding is available
+            sleep(5000)
+
+            configInterpreters(local_port)
+
+            // restart zeppelin
+            execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh restart"
         }
     }
 }
+
 
 task Run << {
 
@@ -103,3 +145,4 @@ task Run << {
         }
     }
 }
+
