@@ -8,6 +8,7 @@ BigInsights for Apache Hadoop clusters are secured using [Apache Knox](https://k
 
 See also:
 
+- [Oozie Map/Reduce cURL Example](../OozieWorkflowMapReduceCurl/README.md)
 - [Oozie Map/Reduce Cookbook](https://cwiki.apache.org/confluence/display/OOZIE/Map+Reduce+Cookbook)
 - [BigInsights Apache Knox documentation](https://www.ibm.com/support/knowledgecenter/en/SSPT3X_4.2.0/com.ibm.swg.im.infosphere.biginsights.admin.doc/doc/knox_overview.html)
 - [BigInsights Oozie documentation](https://www.ibm.com/support/knowledgecenter/SSPT3X_4.2.0/com.ibm.swg.im.infosphere.biginsights.product.doc/doc/bi_oozie.html)
