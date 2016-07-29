@@ -70,7 +70,7 @@ task Run << {
     ssh.run {
         session(remotes.bicluster) {
             
-            // make sure zeppelin is running
+            // make sure zeppelin is installed
             try {
                 execute "[[ -d ./${ZEPPELIN} ]]"
             } 
@@ -80,6 +80,7 @@ task Run << {
                     )
             }
 
+            // make sure zeppelin is running
             execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh status || ./${ZEPPELIN}/bin/zeppelin-daemon.sh start"
  
             def port = forwardLocalPort hostPort: zeppelin_port.toInteger()

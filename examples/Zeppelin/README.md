@@ -103,8 +103,23 @@ Click on the Notebook dropdown menu from the main toolbar and click on the Pyspa
 
 You should also be able to see the above spark job running on the spark cluster.  While the notebook is running, you could ssh into the cluster and run the command `yarn application -list`.  
 
+## Decomposition Instructions
 
+The examples uses a gradle build file [build.gradle](./build.gradle) when you run ./gradlew or gradle.bat. The build.gradle for this 'Run' target does the following:
 
+- verifies that zeppelin has been installed on the cluster
+- verifies if zeppelin is running on the cluster, if not zeppelin is not running it is started 
+- sets up [port forwarding](https://en.wikipedia.org/wiki/Port_forwarding) on the local machine, see below
+
+![SSH Port Forwarding](./ssh_port_forwarding.png)
+
+Port forwarding works as follows:
+
+- the gradle ssh client binds to a random port on the local machine
+- any traffic to this port on the local machine gets forwarded over ssh to the remote zeppelin port
+- gradle prints the URL with the random local port on the local machine
+
+Therefore, when you connect to this local URL you are really connecting to the zeppelin service on the cluster.  
 
 ## Limitations
 
