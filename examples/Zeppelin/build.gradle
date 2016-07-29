@@ -18,6 +18,8 @@ plugins {
   id 'org.hidetake.ssh' version '1.5.0'
 }
 
+def ZEPPELIN='zeppelin-0.6.0-bin-all'
+
 // load some common helper methods
 apply from: "${projectDir}/../../shared/common-helpers.gradle"
 
@@ -25,8 +27,21 @@ apply from: "${projectDir}/../../shared/common-helpers.gradle"
 Properties props = new Properties()
 props.load(new FileInputStream("$projectDir/../../connection.properties"))
 
-def ZEPPELIN='zeppelin-0.6.0-bin-all'
+task CreateTruststore << {
 
+    if (!(new File("${projectDir}/../../certificate").exists())) {
+        throw new GradleException("'certificate' file could not be found in ${projectDir.parentFile.parentFile}")
+    }
+
+    println ">> Remove key store"
+    delete './truststore.jks'
+
+    // import the BigInsights manager certificate
+    println ">> Create key store"
+    ant.exec(executable: "${getKeytoolPath()}", dir:'./') {
+        arg(line: '-import -trustcacerts -alias biginsights -file ../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt')
+    }
+}
 
 task Uninstall << {
     ssh.run {
@@ -39,6 +54,7 @@ task Uninstall << {
             catch (Exception e) {
                 println "problem running kinit - maybe this is a Basic cluster?"
             }
+
             put from: "${projectDir}/zeppelin_uninstall.sh", 
                 into: "./zeppelin_uninstall.sh"
 
@@ -89,7 +105,8 @@ def configureInterpreters = { port ->
     }
 }
 
-task Install << {
+task Install (dependsOn: CreateTruststore) << {
+
     def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
 
     def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
@@ -105,6 +122,10 @@ task Install << {
             catch (Exception e) {
                 println "problem running kinit - maybe this is a Basic cluster?"
             }
+
+            put from: "${projectDir}/truststore.jks", 
+                into: "./zeppelin_truststore.jks"
+
             put from: "${projectDir}/zeppelin_env.sh", 
                 into: "./zeppelin_env.sh"
 
@@ -118,6 +139,7 @@ task Install << {
             // FIXME we seem to need to wait for port forwarding to be setup, but
             //       we should have a better mechanism than sleep for ensuring port
             //       forwarding is available
+
             sleep(5000)
 
             configureInterpreters(local_port)
@@ -151,20 +173,29 @@ task Run << {
 
             // make sure zeppelin is running
             execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh status || ./${ZEPPELIN}/bin/zeppelin-daemon.sh start"
- 
-            def port = forwardLocalPort hostPort: zeppelin_port.toInteger()
+
+            def local_port = 0 // automatically allocate a port
+
+            if (project.hasProperty('ZEP_PORT')) {
+                local_port = project.property('ZEP_PORT').toInteger()
+            }
+
+            def port = forwardLocalPort port: local_port, hostPort: zeppelin_port.toInteger()
+
             def console = System.console()
             if (console) {
                 def output = "\n\n" +
                     "SSH forwarding localhost:${port} -> BigInsights zeppelin localhost:${zeppelin_port}\n\n" +
-                    "You can now access zeppelin from your local machine using the URL: http://localhost:${port}.\n" +
+                    "You can now access zeppelin from your local machine using the URL: http://localhost:${port}.\n\n" +
                     "\n" +
                     "Press ENTER or CTRL+C to quit.\n" +
                     "\n" +
-                    "NOTE: If you quit you will lose your connection to Zeppelin.\n" +
-                    "      After quitting you can execute 'Run' again to connect to Zeppelin.\n" +
-                    "      Every time you execute 'Run' you will get a different port to\n" +
-                    "      connect to on your local machine.\n\n"
+                    "NOTE: - If you quit you will lose your connection to Zeppelin.\n" +
+                    "      - After quitting you can execute 'Run' again to connect to Zeppelin.\n" +
+                    "      - Every time you execute 'Run' you will get a different port to\n" +
+                    "        connect to on your local machine.\n" +
+                    "      - You can set the local port with the gradle '-P' argument, E.g.\n" +
+                    "         './gradlew Run -PZEP_PORT=12345'\n\n"
                 console.readLine(output)
             } else {
                 logger.error "Cannot get console."
@@ -173,3 +204,29 @@ task Run << {
     }
 }
 
+task Stop << {
+
+    def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
+
+    def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
+    def zeppelin_port = matcher[0][1]
+
+    ssh.run {
+        session(remotes.bicluster) {
+            
+            // make sure zeppelin is installed
+            try {
+                execute "[[ -d ./${ZEPPELIN} ]]"
+            } 
+            catch (Exception e) {
+                throw new GradleException(
+                    "Couldn't find the Zeppelin installation.  Try running './gradlew Install'."
+                    )
+            }
+
+            // make sure zeppelin is running
+            execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh stop"
+ 
+        }
+    }
+}
