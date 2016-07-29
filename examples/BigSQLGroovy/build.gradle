@@ -63,7 +63,9 @@ task ('CreateTrustStore', type:Exec) {
     }
 
     // import the BigInsights manager certificate
-    commandLine "keytool -import -trustcacerts -alias biginsights -file ${projectDir}/../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt".split()
+    ant.exec(executable: "${getKeytoolPath()}", dir:'./') {
+        arg(line: '-import -trustcacerts -alias biginsights -file ../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt')
+    }
 }
 
 // Create helper scripts
@@ -113,8 +115,16 @@ db2 CATALOG DATABASE BLUDB AS BLUDB AT NODE DASHNODE"""
       dependsOn CreateTrustStore
       dependsOn SetupLibs
 
+      def bigsql_hostname
+     
+      try { 
+         bigsql_hostname = getMasters(props)['BIGSQL_HEAD'][0]
+      } catch (Exception e) {
+         throw new GradleException('Could not find a BIGSQL host for this cluster.')
+      }
+
       environment 'gateway',  props.gateway
-      environment 'hostname', getMasters(props)['BIGSQL_HEAD'][0]
+      environment 'hostname', bigsql_hostame
       environment 'username', props.username
       environment 'password', props.password
       environment 'dashUser', props.dashUser
