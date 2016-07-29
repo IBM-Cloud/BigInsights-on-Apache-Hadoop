@@ -78,7 +78,7 @@ Follow the instructions output by the Run command.
 
 First run Zeppelin.  In the brower window, you should see an option for configuring interpreters by clicking on the drop down menu button at the top right of the window:
 
-![Configure Interpreters](./ConfigureInterpreters.png)
+![Configure Interpreters](./docs/ConfigureInterpreters.png)
 
 - Select Interpreter
   - Search for 'spark'
@@ -95,7 +95,7 @@ First run Zeppelin.  In the brower window, you should see an option for configur
 
 Click on the Notebook dropdown menu from the main toolbar and click on the Pyspark Test notebook:
 
-![Pyspark Test Notebook](./Pyspark_Test.png)
+![Pyspark Test Notebook](./docs/Pyspark_Test.png)
 
 - Click on the 'Pyspark Test' notebook to open it
 - Click on the run button in the notebook windows to execute the notebook code 
@@ -111,7 +111,7 @@ The examples uses a gradle build file [build.gradle](./build.gradle) when you ru
 - verifies if zeppelin is running on the cluster, if not zeppelin is not running it is started 
 - sets up [port forwarding](https://en.wikipedia.org/wiki/Port_forwarding) on the local machine, see below
 
-![SSH Port Forwarding](./ssh_port_forwarding.png)
+![SSH Port Forwarding](./docs/ssh_port_forwarding.png)
 
 Port forwarding works as follows:
 
