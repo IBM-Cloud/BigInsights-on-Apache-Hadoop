@@ -117,6 +117,6 @@ The [MapReduce.sh](./MapReduce.sh) script performs the following:
 - Every second, check the status of the Oozie workflow job using Knox REST API for Oozie
 - When the Oozie workflow job successfully finishes, download the wordcount output from the Map/Reduce job
 
-All code is well commented and it is suggested that you browse the build.gradle and *.groovy scripts to understand in more detail how they work.
+All code is well commented and it is suggested that you browse the source code to understand in more detail how they work.
 
 
