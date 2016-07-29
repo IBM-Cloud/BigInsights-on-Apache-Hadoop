@@ -42,10 +42,12 @@ The SquirrelSQL window should be opened for you where you can select Hive and Bi
 
 The examples uses a gradle build file [build.gradle](./build.gradle) when you run `./gradlew` or `gradle.bat`.  The build.gradle does the following:
 
+- Configure a truststore for SSL connectivity to Hive/BigSQL
+- Make the Hive/BigSQL jdbc jar files available for SquirrelSQL
 - Download SquirrelSQL and unzip it
 - Configure SquirrelSQL with your connection details
 - Execute SquirrelSQL
 
-All code is well commented and it is suggested that you browse the build.gradle and *.groovy scripts to understand in more detail how they work.
+All code is well commented and it is suggested that you browse the source code to understand in more detail what they do.
 
 
