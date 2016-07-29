@@ -1,6 +1,5 @@
 import groovyx.net.http.RESTClient
 import groovy.json.JsonSlurper
-import static com.jayway.jsonpath.JsonPath.parse
 
 buildscript {
     repositories {
@@ -9,7 +8,6 @@ buildscript {
     dependencies {
         // we need rest + json to configure zeppelin interpreters
         classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
-        classpath 'com.jayway.jsonpath:json-path:2.2.0'
     }
 }
 
