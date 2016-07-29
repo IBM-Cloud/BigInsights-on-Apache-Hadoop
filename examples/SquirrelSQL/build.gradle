@@ -1,0 +1,231 @@
+plugins {
+  id 'groovy'
+  id 'org.hidetake.ssh' version '1.5.0'
+}
+
+repositories {
+    mavenCentral()
+}
+configurations {
+    drivers
+}
+dependencies {
+    drivers "org.apache.hive:hive-jdbc:2.0.0"
+}
+task CopyDrivers(type: Copy) {
+    from configurations.drivers
+        into "$buildDir/hivedrivers"
+}
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+def hostname = getBigSqlHeadHost(props)
+if (hostname == null) {
+    hostname = getMasterManagerHost(props)
+}
+
+task('DownloadSquirrel', type:Copy) {
+
+    // always run this task - don't let gradle decide when to run it
+    outputs.upToDateWhen { false }
+
+    def url = 'http://downloads.sourceforge.net/project/squirrel-sql/1-stable/3.7.1-plainzip/squirrelsql-3.7.1-optional.zip?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fsquirrel-sql%2Ffiles%2F1-stable%2F3.7.1-plainzip%2F&ts=1464716393&use_mirror=netcologne'
+
+    def f = file('squirrelsql-3.7.1-optional.zip')
+    if (!f.exists()) {
+        new URL(url).withInputStream{ i -> f.withOutputStream{ it << i }}
+    }
+
+    from zipTree(f) 
+    into projectDir
+}
+
+task('CreateConfig') {
+
+
+    if (!(file("${projectDir}/../../certificate").exists())) {
+        throw new GradleException("'certificate' file could not be found in ${projectDir.parentFile.parentFile}")
+    }
+
+    delete 'truststore.jks'
+
+    // import the BigInsights manager certificate
+    ant.exec(executable: "${getKeytoolPath()}", dir:'./') {
+        arg(line: '-import -trustcacerts -alias biginsights -file ../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt')
+    }
+
+    delete('config')
+    mkdir('config')
+
+    def hivebeans = new StringBuilder()
+
+    def hivedrivers = fileTree(dir: 'build/hivedrivers', include: '*.jar')
+    hivedrivers.each { 
+        hivebeans << """<Bean Class="net.sourceforge.squirrel_sql.fw.util.beanwrapper.StringWrapper">
+<string>${it}</string>
+</Bean>"""
+    }
+
+    def sqlDrivers = file('config/SQLDrivers.xml')
+
+    sqlDrivers.text = """
+    <Beans>
+    """
+
+    def truststoreDir = projectDir.absolutePath.replaceAll(/\\+/, '/')
+
+    if (getBigSqlHeadHost(props) != null) {
+        sqlDrivers << """
+        <Bean Class="net.sourceforge.squirrel_sql.fw.sql.SQLDriver">
+            <driverClassName>com.ibm.db2.jcc.DB2Driver</driverClassName>
+            <identifier Class="net.sourceforge.squirrel_sql.fw.id.UidIdentifier">
+                <string>-78e7a89e:15507f70947:-7f83</string>
+            </identifier>
+            <jarFileName/>
+            <jarFileNames Indexed="true">
+                <Bean Class="net.sourceforge.squirrel_sql.fw.util.beanwrapper.StringWrapper">
+                    <string>${projectDir}/../../downloads/db2jcc.jar</string>
+                </Bean>
+                <Bean Class="net.sourceforge.squirrel_sql.fw.util.beanwrapper.StringWrapper">
+                    <string>${projectDir}/../../downloads/db2jcc4.jar</string>
+                </Bean>
+                <Bean Class="net.sourceforge.squirrel_sql.fw.util.beanwrapper.StringWrapper">
+                    <string>${projectDir}/../../downloads/db2jcc_license_cu.jar</string>
+                </Bean>
+            </jarFileNames>
+            <name>bigsql</name>
+            <url>jdbc:db2://hostname:51000/bigsql:sslConnection=true;sslTrustStoreLocation=${truststoreDir}/truststore.jks;Password=mypassword;</url>
+            <websiteUrl/>
+        </Bean>
+        """
+    }
+    sqlDrivers << """
+        <Bean Class="net.sourceforge.squirrel_sql.fw.sql.SQLDriver">
+            <driverClassName>org.apache.hive.jdbc.HiveDriver</driverClassName>
+            <identifier Class="net.sourceforge.squirrel_sql.fw.id.UidIdentifier">
+                <string>-6fec4a29:1504ca1e75e:-7f45</string>
+            </identifier>
+            <jarFileName/>
+            <jarFileNames Indexed="true">
+                ${hivebeans}
+            </jarFileNames>
+            <name>Hive</name>
+            <url>jdbc:hive://localhost:10000/default</url>
+            <websiteUrl/>
+        </Bean>
+    </Beans>"""
+
+
+    def sqlAliases = file('config/SQLAliases23.xml')
+
+    sqlAliases.text = """
+        <Beans>
+        """
+
+    if (getBigSqlHeadHost(props) != null) {
+        sqlAliases << """
+            <Bean Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAlias">
+                <autoLogon>false</autoLogon>
+                <colorProperties Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAliasColorProperties">
+                    <objectTreeBackgroundColorRgbValue>0</objectTreeBackgroundColorRgbValue>
+                    <overrideObjectTreeBackgroundColor>false</overrideObjectTreeBackgroundColor>
+                    <overrideStatusBarBackgroundColor>false</overrideStatusBarBackgroundColor>
+                    <overrideToolbarBackgroundColor>false</overrideToolbarBackgroundColor>
+                    <statusBarBackgroundColorRgbValue>0</statusBarBackgroundColorRgbValue>
+                    <toolbarBackgroundColorRgbValue>0</toolbarBackgroundColorRgbValue>
+                </colorProperties>
+                <connectAtStartup>false</connectAtStartup>
+                <connectionProperties Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAliasConnectionProperties">
+                    <enableConnectionKeepAlive>false</enableConnectionKeepAlive>
+                    <keepAliveSleepTimeSeconds>120</keepAliveSleepTimeSeconds>
+                    <keepAliveSqlStatement/>
+                </connectionProperties>
+                <driverIdentifier Class="net.sourceforge.squirrel_sql.fw.id.UidIdentifier">
+                    <string>-78e7a89e:15507f70947:-7f83</string>
+                </driverIdentifier>
+                <driverProperties Class="net.sourceforge.squirrel_sql.fw.sql.SQLDriverPropertyCollection">
+                    <driverProperties Indexed="true"/>
+                </driverProperties>
+                <identifier Class="net.sourceforge.squirrel_sql.fw.id.UidIdentifier">
+                    <string>1cc2465a:15507ffc69c:-7fc1</string>
+                </identifier>
+                <name>BigSQL - ${hostname}</name>
+                <schemaProperties Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAliasSchemaProperties">
+                    <cacheSchemaIndependentMetaData>false</cacheSchemaIndependentMetaData>
+                    <globalState>0</globalState>
+                    <schemaDetails Indexed="true"/>
+                </schemaProperties>
+                <url>jdbc:db2://${hostname}:51000/bigsql:sslConnection=true;sslTrustStoreLocation=${truststoreDir}/truststore.jks;Password=mypassword;</url>
+                <useDriverProperties>false</useDriverProperties>
+                <userName>${props.username}</userName>
+                <password>${props.password}</password>
+            </Bean>
+            """
+    }
+    sqlAliases << """
+            <Bean Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAlias">
+                <autoLogon>false</autoLogon>
+                <colorProperties Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAliasColorProperties">
+                    <objectTreeBackgroundColorRgbValue>0</objectTreeBackgroundColorRgbValue>
+                    <overrideObjectTreeBackgroundColor>false</overrideObjectTreeBackgroundColor>
+                    <overrideStatusBarBackgroundColor>false</overrideStatusBarBackgroundColor>
+                    <overrideToolbarBackgroundColor>false</overrideToolbarBackgroundColor>
+                    <statusBarBackgroundColorRgbValue>0</statusBarBackgroundColorRgbValue>
+                    <toolbarBackgroundColorRgbValue>0</toolbarBackgroundColorRgbValue>
+                </colorProperties>
+                <connectAtStartup>false</connectAtStartup>
+                <connectionProperties Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAliasConnectionProperties">
+                    <enableConnectionKeepAlive>false</enableConnectionKeepAlive>
+                    <keepAliveSleepTimeSeconds>120</keepAliveSleepTimeSeconds>
+                    <keepAliveSqlStatement/>
+                </connectionProperties>
+                <driverIdentifier Class="net.sourceforge.squirrel_sql.fw.id.UidIdentifier">
+                    <string>-6fec4a29:1504ca1e75e:-7f45</string>
+                </driverIdentifier>
+                <driverProperties Class="net.sourceforge.squirrel_sql.fw.sql.SQLDriverPropertyCollection">
+                    <driverProperties Indexed="true"/>
+                </driverProperties>
+                <identifier Class="net.sourceforge.squirrel_sql.fw.id.UidIdentifier">
+                    <string>1cc2465a:15507ffc69c:-7fc2</string>
+                </identifier>
+                <name>Hive - ${hostname}</name>
+                <schemaProperties Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAliasSchemaProperties">
+                    <cacheSchemaIndependentMetaData>false</cacheSchemaIndependentMetaData>
+                    <globalState>0</globalState>
+                    <schemaDetails Indexed="true"/>
+                </schemaProperties>
+                <url>jdbc:hive2://${hostname}:10000/default;ssl=true;sslTrustStore=${truststoreDir}/truststore.jks;trustStorePassword=mypassword;</url>
+                <useDriverProperties>false</useDriverProperties>
+                <userName>${props.username}</userName>
+                <password>${props.password}</password>
+            </Bean>
+        </Beans>"""
+
+}
+
+task('RunSquirrel', type:Exec) {
+
+    dependsOn CopyDrivers, DownloadSquirrel, CreateConfig
+
+    commandLine "java", 
+                "-jar", "${projectDir}/squirrelsql-3.7.1-optional/squirrel-sql.jar", 
+                "-userdir", "${projectDir}/config/",
+                "-home", "${projectDir}/squirrelsql-3.7.1-optional",
+                "-nos"
+}
+
+clean.doFirst {
+    delete "${projectDir}/truststore.jks"
+    println "${projectDir}/truststore.jks"
+    delete "${projectDir}/config"
+    println "${projectDir}/config"
+    delete "${projectDir}/squirrelsql-3.7.1-optional.zip"
+    println "${projectDir}/squirrelsql-3.7.1-optional.zip"
+    delete "${projectDir}/squirrelsql-3.7.1-optional"
+    println "${projectDir}/squirrelsql-3.7.1-optional"
+}
+

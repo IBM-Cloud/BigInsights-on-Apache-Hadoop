@@ -33,6 +33,7 @@ This page lists all of the examples.
 - Create and Drop table using Groovy [[HiveGroovy](./HiveGroovy/README.md)]
 
 *********************************************************************
+
 #### Oozie
 
 - Compile a Map/Reduce Java application and submit it to Oozie using Groovy [[OozieWorkflowMapReduceGroovy](./OozieWorkflowMapReduceGroovy/README.md)]
@@ -40,6 +41,11 @@ This page lists all of the examples.
 
 *********************************************************************
 
+#### SquirrelSQL
+
+- Download, configure and Run SquirrelSQL [[SquirrelSQL](./SquirrelSQL/README.md)]
+
+*********************************************************************
 #### Zeppelin
 
 - Install, configure and run Zeppelin. Run a Pyspark notebook  [[Zeppelin](./Zeppelin/README.md)]
