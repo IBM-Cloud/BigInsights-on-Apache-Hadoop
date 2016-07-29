@@ -124,7 +124,7 @@ db2 CATALOG DATABASE BLUDB AS BLUDB AT NODE DASHNODE"""
       }
 
       environment 'gateway',  props.gateway
-      environment 'hostname', bigsql_hostame
+      environment 'hostname', bigsql_hostname
       environment 'username', props.username
       environment 'password', props.password
       environment 'dashUser', props.dashUser
