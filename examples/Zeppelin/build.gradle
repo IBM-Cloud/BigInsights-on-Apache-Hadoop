@@ -193,7 +193,8 @@ task Run << {
                     "      - Every time you execute 'Run' you will get a different port to\n" +
                     "        connect to on your local machine.\n" +
                     "      - You can set the local port with the gradle '-P' argument, E.g.\n" +
-                    "         './gradlew Run -PZEP_PORT=12345'\n\n"
+                    "         './gradlew Run -PZEP_PORT=12345'\n" +
+                    "        make sure port you specify is valid and not occupied on your system.\n\n"
                 console.readLine(output)
             } else {
                 logger.error "Cannot get console."
