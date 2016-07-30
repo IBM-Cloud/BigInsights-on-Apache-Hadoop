@@ -28,6 +28,8 @@ if (hostname == null) {
     hostname = getMasterManagerHost(props)
 }
 
+def hiveServerHost = getMasters(props)['HIVE_SERVER'][0]
+
 task('DownloadSquirrel', type:Copy) {
 
     // always run this task - don't let gradle decide when to run it
@@ -192,13 +194,13 @@ task('CreateConfig') {
                 <identifier Class="net.sourceforge.squirrel_sql.fw.id.UidIdentifier">
                     <string>1cc2465a:15507ffc69c:-7fc2</string>
                 </identifier>
-                <name>Hive - ${hostname}</name>
+                <name>Hive - ${hiveServerHost}</name>
                 <schemaProperties Class="net.sourceforge.squirrel_sql.client.gui.db.SQLAliasSchemaProperties">
                     <cacheSchemaIndependentMetaData>false</cacheSchemaIndependentMetaData>
                     <globalState>0</globalState>
                     <schemaDetails Indexed="true"/>
                 </schemaProperties>
-                <url>jdbc:hive2://${hostname}:10000/default;ssl=true;sslTrustStore=${truststoreDir}/truststore.jks;trustStorePassword=mypassword;</url>
+                <url>jdbc:hive2://${hiveServerHost}:10000/default;ssl=true;sslTrustStore=${truststoreDir}/truststore.jks;trustStorePassword=mypassword;</url>
                 <useDriverProperties>false</useDriverProperties>
                 <userName>${props.username}</userName>
                 <password>${props.password}</password>
