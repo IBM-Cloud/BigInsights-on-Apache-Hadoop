@@ -20,6 +20,8 @@ NOTE:
 - You do NOT need to install gradle, the gradlew scripts mentioned below will install gradle for you
 - Some examples may not work if you connect to the Internet through a non-transparent proxy server 
 
+*********************************************************************
+
 ### Setup Instructions
 
 Follow these steps on your client machine.  If you encounter an issue, see the [FAQ](./FAQ.md) for common issues and their resolution.
