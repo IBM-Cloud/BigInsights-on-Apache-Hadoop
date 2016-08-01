@@ -14,7 +14,7 @@ Developers will gain the most from these examples if they are:
 
 - Comfortable using Windows, OS X or *nix command prompts
 - Familiar with Database concepts and SQL language
-- Able to read code written in a high level language such as Java
+- Able to read code written in a high level language such as [Java](https://en.wikipedia.org/wiki/Java_\(programming_language\))
 - Familiar with the [Gradle](https://gradle.org/) build tool
 
 ## Example Requirements
