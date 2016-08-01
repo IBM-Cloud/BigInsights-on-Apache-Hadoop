@@ -32,6 +32,7 @@ This page lists all of the examples.
 #### Hive
 
 - Create and Drop table using Groovy [[HiveGroovy](./HiveGroovy/README.md)]
+- Create and Drop table using Java [[HiveJava](./HiveJava/README.md)]
 
 *********************************************************************
 

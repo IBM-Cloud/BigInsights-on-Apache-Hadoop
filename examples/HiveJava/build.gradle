@@ -1,0 +1,64 @@
+// set the dependencies for running the groovy script
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.apache.hive:hive-jdbc:2.0.0'
+    }
+}
+
+plugins {
+  id 'groovy'
+  id 'org.hidetake.ssh' version '1.5.0'
+}
+
+// set the dependencies for compiling the groovy script
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+//    compile('org.apache.hive:hive-jdbc:2.0.0') {
+//        exclude group:'org.apache.logging.log4j', module:'log4j-slf4j-impl'
+//    }
+      compile('org.apache.hive:hive-jdbc:2.0.0')
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir file('.') include 'truststore.jks' 
+        }
+    }
+}
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+// task to run a Java class
+task('Example', type: JavaExec) {
+
+    Properties props = new Properties()
+    props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+    if (!(new File("${projectDir}/../../certificate").exists())) {
+        throw new GradleException("'certificate' file could not be found in ${projectDir.parentFile.parentFile}")
+    }
+
+    delete './truststore.jks'
+
+    // import the BigInsights manager certificate
+    ant.exec(executable: 'keytool', dir:'./') {
+        arg(line: '-import -trustcacerts -alias biginsights -file ../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt')
+    }
+
+    // pass environment variables to the class
+    environment 'hostname', getMasters(props)['HIVE_SERVER'][0]
+    environment 'username', props.username
+    environment 'password', props.password
+
+    // run the class
+    main = 'Example'
+    classpath = sourceSets.main.runtimeClasspath
+}
