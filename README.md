@@ -24,7 +24,7 @@ NOTE:
 
 Follow these steps on your client machine.  If you encounter an issue, see the [FAQ](./FAQ.md) for common issues and their resolution.
 
-- Clone this repository `git clone https://github.com/snowch/biginsight-bluemix-docs.git`
+- Clone this repository `git clone https://github.com/IBM-Bluemix/BigInsights-on-Apache-Hadoop.git`
 - Change into the directory of the cloned repository `cd biginsight-bluemix-docs`
 - Copy `connection.properties_template` to `connection.properties`
 - Edit `connection.properties` to add your connection details for BigInsights
