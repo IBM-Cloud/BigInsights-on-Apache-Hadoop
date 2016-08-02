@@ -19,6 +19,7 @@ This page lists all of the examples.
 
 - Connects to HBase and check system version, cluster version and status using Groovy [[HBaseGroovy](./HBaseGroovy/README.md)]
 - Manipulate schema and execute CRUD operation using Groovy [[HBaseGroovy](./HBaseGroovy/README.md)]
+- Connects to HBase and check system version, cluster version and status using Java [[HBaseJava](./HBaseJava/README.md)]
 
 *********************************************************************
 
