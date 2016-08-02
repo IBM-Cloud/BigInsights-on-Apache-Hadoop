@@ -1,0 +1,69 @@
+// set the dependencies for running the groovy script
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.codehaus.groovy:groovy-all:2.0.5'
+        classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+    }
+}
+
+plugins {
+  id 'groovy'
+}
+
+// get the cluster connection details
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+// Set default service name to check
+def service_name = "HDFS"
+
+// set the dependencies for compiling the groovy script
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.0.5'
+    compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+}
+
+// tell gradle the groovy script is in the same folder as the build.gradle file
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['.']
+        }
+    }
+}
+
+// Get service name from command line argument
+// For example -Pservice=YARN. 
+// See service ServiceCheck.grooyv for valid value
+if (project.hasProperty('service')) {
+   service_name = service
+}
+
+// task to run the Example.groovy script
+['ListServices', 'ShowMaster', 'AlertServices', 'HdfsServiceCheck', 'ServiceCheck', 'RestartService'].each { taskName ->
+   task "$taskName" (type: JavaExec) {
+
+      // if running this task with clean, ensure clean runs first
+      mustRunAfter clean 
+
+      environment 'ambariUrl', props.ambariUrl
+      environment 'ambariUsername', props.ambariUsername
+      environment 'ambariPassword', props.ambariPassword
+      environment 'service_name', service_name
+
+      main = taskName
+      classpath = sourceSets.main.runtimeClasspath
+   }
+}
+
+task('Example') {
+
+    dependsOn ListServices, HdfsServiceCheck, ShowMaster
+}
