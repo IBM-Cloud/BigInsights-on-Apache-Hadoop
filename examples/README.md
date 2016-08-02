@@ -2,6 +2,14 @@ This page lists all of the examples.
 
 *********************************************************************
 
+#### Ambari
+
+- Performs HDFS service check via Ambari REST api using Groovy [[Ambari](./Ambari/README.md)]
+- Lists installed services via Ambari REST api using Groovy [[Ambari](./Ambari/README.md)]
+- Shows the hostname for BIGSQL, HIVE, KNOX and BIGR services where the master component runs via Ambari REST api using Groovy [[Ambari](./Ambari/README.md)]
+
+*********************************************************************
+
 #### Big SQL
 
 - Connects to Big SQL via JDBC using Groovy [[BigSQLGroovy](./BigSQLGroovy/README.md)]
