@@ -1,0 +1,49 @@
+apply plugin: 'com.github.tkruse.groovysh'
+apply plugin: 'java'
+
+// set the dependencies for running the groovy script
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.apache.knox:gateway-shell:0.6.0'
+        classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.7'
+    }
+}
+
+// set the dependencies for compiling the groovy script
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.apache.knox:gateway-shell:0.6.0'
+    compile 'commons-io:commons-io:2.4'
+}
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+groovysh {
+    shell {
+        environment = [
+            'gateway':props.gateway,
+            'username':props.username,
+            'password':props.password
+        ]
+        args = [
+            '-e', 
+            'import org.apache.hadoop.gateway.shell.Hadoop;' +
+            'import org.apache.hadoop.gateway.shell.hdfs.Hdfs;' +
+            'import org.apache.hadoop.gateway.shell.job.Job;' +
+            'import org.apache.hadoop.gateway.shell.workflow.Workflow;' +
+            'import org.apache.hadoop.gateway.shell.yarn.Yarn;' +
+            'import groovy.json.JsonSlurper;' +
+            'import java.util.concurrent.TimeUnit;\n' + 
+            """session = Hadoop.login( "${props.gateway}", "${props.username}", "${props.password}" );\n""" +
+            'slurper = new JsonSlurper();\n'
+        ]
+    }
+}
+
