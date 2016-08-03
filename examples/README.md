@@ -45,6 +45,12 @@ This page lists all of the examples.
 
 *********************************************************************
 
+####  Knox
+
+- Run a knox shell client session [[Knoxshell](./Knoxshell/README.md)]
+
+*********************************************************************
+
 #### Oozie
 
 - Compile a Map/Reduce Java application and submit it to Oozie using Groovy [[OozieWorkflowMapReduceGroovy](./OozieWorkflowMapReduceGroovy/README.md)]
