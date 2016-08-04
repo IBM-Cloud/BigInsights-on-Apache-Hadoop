@@ -42,6 +42,7 @@ This page lists all of the examples.
 
 - Create and Drop table using Groovy [[HiveGroovy](./HiveGroovy/README.md)]
 - Create and Drop table using Java [[HiveJava](./HiveJava/README.md)]
+- Start a Hive Beeline Session [[HiveBeeline](./HiveBeeline/README.md)]
 
 *********************************************************************
 
