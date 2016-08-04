@@ -86,6 +86,30 @@ First run Zeppelin, Then click on the Notebook dropdown menu from the main toolb
 
 You should also be able to see the above spark job running on the spark cluster.  While the notebook is running, you could ssh into the cluster and run the command `yarn application -list`.  
 
+### Test Zeppelin with SparkR
+
+Follow the instructions for Pyspark, then create a new cell with the contents:
+
+```
+%spark.r 
+
+peopleDF <- read.json(sqlContext, file.path("file://", Sys.getenv("SPARK_HOME"), "examples/src/main/resources/people.json"))
+printSchema(peopleDF)
+SparkR::head(peopleDF)
+```
+
+and the output:
+
+```
+root
+ |– age: long (nullable = true)
+ |– name: string (nullable = true)
+  age    name
+1  NA Michael
+2  30    Andy
+3  19  Justin
+```
+
 ## Decomposition Instructions
 
 The examples uses a gradle build file [build.gradle](./build.gradle) when you run ./gradlew or gradle.bat. The build.gradle for this 'Run' target does the following:
