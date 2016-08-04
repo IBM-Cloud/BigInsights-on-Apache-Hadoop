@@ -64,6 +64,15 @@ This page lists all of the examples.
 - Download, configure and Run SquirrelSQL [[SquirrelSQL](./SquirrelSQL/README.md)]
 
 *********************************************************************
+
+#### WebHCat/Templeton (Using Knox API)
+
+- Execute a Hive Job using Groovy [[WebHCatGroovy](./WebHCatGroovy/README.md)]
+- Execute a MapReduce Job using Groovy  [[WebHCatGroovy](./WebHCatGroovy/README.md)]
+- Execute a Pig Job using Groovy [[WebHCatGroovy](./WebHCatGroovy/README.md)]
+
+*********************************************************************
+
 #### Zeppelin
 
 - Install, configure and run Zeppelin. Run a Pyspark notebook  [[Zeppelin](./Zeppelin/README.md)]
