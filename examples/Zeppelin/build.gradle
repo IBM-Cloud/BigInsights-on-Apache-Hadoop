@@ -131,6 +131,12 @@ task Install (dependsOn: CreateTruststore) << {
             put from: "${projectDir}/Pyspark_Test.json", 
                 into: "./Pyspark_Test.json"
 
+            put from: "${projectDir}/setup.R", 
+                into: "./setup.R"
+
+            execute "mkdir -p ~/R/packages/"
+            execute "/usr/iop/current/spark-client/bin/sparkR setup.R"
+
             execute "bash ./zeppelin_install.sh"
 
             def local_port = forwardLocalPort hostPort: zeppelin_port.toInteger()
