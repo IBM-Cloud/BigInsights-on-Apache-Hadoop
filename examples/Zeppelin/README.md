@@ -88,7 +88,7 @@ You should also be able to see the above spark job running on the spark cluster.
 
 ### Test Zeppelin with SparkR
 
-Follow the instructions for Pyspark, then create a new cell with the contents:
+Follow the instructions for 'Test Zeppelin with Pyspark', then create a new cell with the contents:
 
 ```
 %spark.r 
