@@ -56,8 +56,6 @@ task Uninstall << {
             put from: "${projectDir}/zeppelin_uninstall.sh", 
                 into: "./zeppelin_uninstall.sh"
 
-            put from: "${projectDir}/Pyspark_Test.json", 
-                into: "./Pyspark_Test.json"
 
             execute "bash ./zeppelin_uninstall.sh"
         }
@@ -129,6 +127,9 @@ task Install (dependsOn: CreateTruststore) << {
 
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
+
+            put from: "${projectDir}/Pyspark_Test.json", 
+                into: "./Pyspark_Test.json"
 
             execute "bash ./zeppelin_install.sh"
 
