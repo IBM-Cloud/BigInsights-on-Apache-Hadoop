@@ -128,6 +128,8 @@ task Install (dependsOn: CreateTruststore) << {
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
 
+            // TODO we don't need to copy this - we could execute the install 
+            // via ssh forwarding
             put from: "${projectDir}/Pyspark_Test.json", 
                 into: "./Pyspark_Test.json"
 
@@ -135,6 +137,9 @@ task Install (dependsOn: CreateTruststore) << {
                 into: "./setup.R"
 
             execute "mkdir -p ~/R/packages/"
+
+            execute """echo '.libPaths( c( .libPaths(), "~/R/packages") )' >> ~/.Rprofile"""
+
             execute "/usr/iop/current/spark-client/bin/sparkR setup.R"
 
             execute "bash ./zeppelin_install.sh"
