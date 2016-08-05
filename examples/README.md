@@ -75,7 +75,7 @@ This page lists all of the examples.
 
 #### Zeppelin
 
-- Install, configure and run Zeppelin. Run a Pyspark notebook  [[Zeppelin](./Zeppelin/README.md)]
+- Install, configure and run Zeppelin. Run Pyspark and SparkR notebooks  [[Zeppelin](./Zeppelin/README.md)]
 
 *********************************************************************
 
