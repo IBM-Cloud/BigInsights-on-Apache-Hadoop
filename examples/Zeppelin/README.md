@@ -73,6 +73,31 @@ Press ENTER to quit.
 
 Follow the instructions output by the Run command.  
 
+### Zeppelin daemon: stop, start, status
+
+You can check the status of the Zeppelin daemon by running `./gradlew -q status`
+
+```bash
+$ ./gradlew -q status
+bicluster#1|Zeppelin is running                            [  OK  ]
+bicluster#1|
+```
+
+You can stop the Zeppelin daemon with `./gradlew -q stop`
+
+```bash
+$ ./gradlew -q stop
+bicluster#1|Zeppelin stop                                  [  OK  ]
+```
+
+and start the Zeppelin daemon with `./gradlew -q start`
+
+```bash
+$ ./gradlew -q start
+bicluster#1|Zeppelin start                                 [  OK  ]
+bicluster#1|
+```
+
 
 ### Test Zeppelin with Pyspark
 
@@ -85,6 +110,8 @@ First run Zeppelin, Then click on the Notebook dropdown menu from the main toolb
 - Verify the row count output from spark equals the expected row count
 
 You should also be able to see the above spark job running on the spark cluster.  While the notebook is running, you could ssh into the cluster and run the command `yarn application -list`.  
+
+**NOTE**: The spark yarn application should remain in RUNNING state until it is explicilty closed or Zeppelin is restarted. 
 
 ## Decomposition Instructions
 
