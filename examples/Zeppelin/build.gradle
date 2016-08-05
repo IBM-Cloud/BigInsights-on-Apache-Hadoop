@@ -101,6 +101,27 @@ def configureInterpreters = { port ->
     }
 }
 
+def uploadNotebooks = { port ->
+
+    def url = "http://localhost:${port}/"
+
+    file("${projectDir}/example_notebooks").eachFile { file ->
+
+        // TODO add a verification step - don't upload notebook
+        //      if it already exists
+
+        // upload the notebook
+        def client = new RESTClient( url )
+        def resp = client.post ( 
+                        path : "api/notebook",
+                        body : file.text,
+                        requestContentType : 'application/json'
+                   )
+
+        assert resp.status == 201
+    }
+}
+
 task Install (dependsOn: CreateTruststore) << {
 
     def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
@@ -128,10 +149,7 @@ task Install (dependsOn: CreateTruststore) << {
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
 
-            // TODO we don't need to copy this - we could execute the install 
-            // via ssh forwarding
-            put from: "${projectDir}/Pyspark_Test.json", 
-                into: "./Pyspark_Test.json"
+            // sparkR setup
 
             put from: "${projectDir}/setup.R", 
                 into: "./setup.R"
@@ -141,6 +159,8 @@ task Install (dependsOn: CreateTruststore) << {
             execute """echo '.libPaths( c( .libPaths(), "~/R/packages") )' >> ~/.Rprofile"""
 
             execute "/usr/iop/current/spark-client/bin/sparkR setup.R"
+
+            // install zeppelin
 
             execute "bash ./zeppelin_install.sh"
 
@@ -153,6 +173,8 @@ task Install (dependsOn: CreateTruststore) << {
             sleep(5000)
 
             configureInterpreters(local_port)
+
+            uploadNotebooks(local_port)
 
             // restart zeppelin
             execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh restart"

@@ -52,13 +52,3 @@ source ./${ZEPPELIN}/conf/zeppelin-env.sh
 
 ./${ZEPPELIN}/bin/zeppelin-daemon.sh start
 
-
-# TODO poll for service by checking with curl
-sleep 30
-
-curl -X POST http://localhost:${ZEPPELIN_PORT}/api/notebook \
-     -H "Content-Type: application/json" \
-     -d @Pyspark_Test.json
-
-./${ZEPPELIN}/bin/zeppelin-daemon.sh restart
-
