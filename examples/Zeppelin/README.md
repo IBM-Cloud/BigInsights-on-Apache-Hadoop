@@ -82,7 +82,7 @@ Press ENTER to quit.
 
 Follow the instructions output by the Run command.  
 
-### Zeppelin daemon: stop, start, status
+### Zeppelin daemon: stop, start, status, restart
 
 You can check the status of the Zeppelin daemon by running `./gradlew -q status`
 
@@ -106,7 +106,13 @@ $ ./gradlew -q start
 bicluster#1|Zeppelin start                                 [  OK  ]
 bicluster#1|
 ```
+and restart Zeppelin daemon with `./gradlew -q restart`
 
+```
+$ ./gradlew -q restart
+bicluster#1|Zeppelin stop                                  [  OK  ]
+bicluster#1|Zeppelin start                                 [  OK  ]
+```
 
 ### Test Zeppelin with Pyspark
 
