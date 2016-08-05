@@ -128,8 +128,19 @@ task Install (dependsOn: CreateTruststore) << {
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
 
+            // TODO we don't need to copy this - we could execute the install 
+            // via ssh forwarding
             put from: "${projectDir}/Pyspark_Test.json", 
                 into: "./Pyspark_Test.json"
+
+            put from: "${projectDir}/setup.R", 
+                into: "./setup.R"
+
+            execute "mkdir -p ~/R/packages/"
+
+            execute """echo '.libPaths( c( .libPaths(), "~/R/packages") )' >> ~/.Rprofile"""
+
+            execute "/usr/iop/current/spark-client/bin/sparkR setup.R"
 
             execute "bash ./zeppelin_install.sh"
 
@@ -204,7 +215,7 @@ task Run << {
     }
 }
 
-['stop', 'start', 'status'].each { action ->
+['stop', 'start', 'status', 'restart'].each { action ->
 task "$action" << {
 
     def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
@@ -225,10 +236,41 @@ task "$action" << {
                     )
             }
 
-            // execute zeppelin daemon action
-            execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh $action"
+            try {
+                // execute zeppelin daemon action
+                execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh $action"
+            } 
+            catch (Exception e) {
+                // do nothing - ignore error from status command
+            }
  
         }
     }
 }
 }
+
+task UpdateEnv << {
+
+    ssh.run {
+        // remotes.bicluster is defined in shared/common-helpers.gradle
+        session(remotes.bicluster) {
+
+            // make sure zeppelin is installed
+            try {
+                execute "[[ -d ./${ZEPPELIN} ]]"
+            } 
+            catch (Exception e) {
+                throw new GradleException(
+                    "Couldn't find the Zeppelin installation.  Try running './gradlew Install'."
+                    )
+            }
+            put from: "${projectDir}/zeppelin_env.sh", 
+                into: "./${ZEPPELIN}/conf/zeppelin-env.sh"
+
+            println "\n\n"
+            println ">> zeppelin_env.sh has been copied to the cluster."
+            println ">> Run `./gradlew restart` to apply your changes."
+        }
+    }
+}
+
