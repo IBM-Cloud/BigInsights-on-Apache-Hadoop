@@ -188,7 +188,7 @@ task('SetupLibs') {
         // create a folder for the libraries
         mkdir("${projectDir}/lib")
 
-        ['db2jcc.jar', 'db2jcc4.jar', 'db2jcc_license_cu.jar'].each { jar ->
+        ['db2jcc.jar', 'db2jcc4.jar'].each { jar ->
             if (!file("${projectDir}/lib/${jar}").exists()) 
             {
                 def src = file("${projectDir}/../../downloads/${jar}")

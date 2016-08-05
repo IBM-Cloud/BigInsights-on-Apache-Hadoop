@@ -1,0 +1,47 @@
+plugins {
+  id 'groovy'
+  id 'org.hidetake.ssh' version '1.5.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.0.5'
+    compile 'org.apache.hive:hive-beeline:2.0.0'
+}
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+// Get Hive server host name
+def hostname = getMasters(props)['HIVE_SERVER'][0]
+
+// task to run a script
+task('Example', type: JavaExec) {
+
+    if (!(file("${projectDir}/../../certificate").exists())) {
+        throw new GradleException("'certificate' file could not be found in ${projectDir.parentFile.parentFile}")
+    }
+
+    // import the BigInsights manager certificate
+    println '>> Creating key store\n'
+    ant.exec(executable: "${getKeytoolPath()}", dir:'./') {
+        arg(line: '-import -trustcacerts -alias biginsights -file ../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt')
+    }
+
+    // run the Beeline client
+    println '>> Starting Beeline and connect to Hive\n'
+    main = 'org.apache.hive.beeline.BeeLine'
+    classpath = sourceSets.main.runtimeClasspath
+    args = [ 
+        "-u", "jdbc:hive2://${hostname}:10000/default;ssl=true;sslTrustStore=${projectDir.absolutePath.replaceAll(/\\+/, '/')}/truststore.jks;",
+        "-n", props.username,
+        "-p", props.password
+     ]
+    standardInput = System.in
+}
