@@ -101,7 +101,7 @@ def configureInterpreters = { port ->
           configureInterpreter(port, interpreter) 
        }
        if ( interpreter.name == "jdbc") {
-          interpreter.dependencies = '[{"groupArtifactVersion":"org.apache.hive:hive-jdbc:0.14.0","local":false},{"groupArtifactVersion":"org.apache.hadoop:hadoop-common:2.6.0","local":false,"exclusions":[]}]'
+          interpreter.dependencies = '[{"groupArtifactVersion":"org.apache.hive:hive-jdbc:0.14.0","local":false},{"groupArtifactVersion":"org.apache.hadoop:hadoop-common:2.6.0","local":false,"exclusions":["jdk.tools:jdk.tools:jar:1.6"]}]'
           interpreter.properties['hive.url'] = 'jdbc:hive2://' + hiveHost + ':10000/default;ssl\u003dtrue;sslTrustStore\u003d/home/' + props.username + '/zeppelin_truststore.jks;trustStorePassword\u003dmypassword;'
           interpreter.properties['hive.user'] = props.username
           interpreter.properties['hive.password'] = props.password
