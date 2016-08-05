@@ -32,6 +32,12 @@ To install Zeppelin, in a command prompt window:
 ```bash
 biginsight-bluemix-docs $ cd examples/Zeppelin
 biginsight-bluemix-docs/examples/Zeppelin $ ./gradlew Install
+:CreateTruststore
+>> Remove truststore
+>> Create truststore
+:Install
+...
+BUILD SUCCESSFUL
 ```
 
 ### Uninstall Zeppelin
@@ -46,6 +52,9 @@ To uninstall Zeppelin, in a command prompt window:
 ```bash
 biginsight-bluemix-docs $ cd examples/Zeppelin
 biginsight-bluemix-docs/examples/Zeppelin $ ./gradlew Uninstall
+:Uninstall
+...
+BUILD SUCCESSFUL
 ```
 
 ### Run Zeppelin
