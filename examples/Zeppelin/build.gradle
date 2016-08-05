@@ -204,7 +204,8 @@ task Run << {
     }
 }
 
-task Stop << {
+['stop', 'start', 'status'].each { action ->
+task "$action" << {
 
     def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
 
@@ -224,9 +225,10 @@ task Stop << {
                     )
             }
 
-            // make sure zeppelin is running
-            execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh stop"
+            // execute zeppelin daemon action
+            execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh $action"
  
         }
     }
+}
 }
