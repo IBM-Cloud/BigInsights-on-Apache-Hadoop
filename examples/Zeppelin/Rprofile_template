@@ -1,0 +1,1 @@
+.libPaths( c( .libPaths(), "~/R/packages") )
