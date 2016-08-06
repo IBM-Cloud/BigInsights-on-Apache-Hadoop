@@ -204,7 +204,14 @@ task Install (dependsOn: CreateTruststore) << {
 
             execute "mkdir -p ~/R/packages/"
 
-            execute """echo '.libPaths( c( .libPaths(), "~/R/packages") )' >> ~/.Rprofile"""
+            def rprofile = file("${projectDir}/Rprofile")
+
+            if (!rprofile.exists()) {
+                rprofile.text = file("${projectDir}/Rprofile_template").text
+            }
+
+            put from: "${projectDir}/Rprofile", 
+                into: "./.Rprofile"
 
             execute "/usr/iop/current/spark-client/bin/sparkR setup.R"
 
