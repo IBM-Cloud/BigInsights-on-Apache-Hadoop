@@ -25,8 +25,17 @@ apply from: "${projectDir}/../../shared/common-helpers.gradle"
 Properties props = new Properties()
 props.load(new FileInputStream("$projectDir/../../connection.properties"))
 
-def hiveHost = getMasters(props)['HIVE_SERVER'][0]
-def bigsqlHost = getMasters(props)['BIGSQL_HEAD'][0]
+def hiveHost = null
+try {
+    hiveHost = getMasters(props)['HIVE_SERVER'][0]
+} catch (Exception e) {
+}
+
+def bigsqlHost = null 
+try {
+    bigsqlHost = getMasters(props)['BIGSQL_HEAD'][0]
+} catch (Exception e) {
+}
 
 task CreateTruststore << {
 
@@ -59,6 +68,8 @@ task Uninstall << {
             put from: "${projectDir}/zeppelin_uninstall.sh", 
                 into: "./zeppelin_uninstall.sh"
 
+            // dos2unix incase users have edited on windows
+            execute "sed -i 's/\r//' ./zeppelin_uninstall.sh"
 
             execute "bash ./zeppelin_uninstall.sh"
         }
@@ -103,16 +114,20 @@ def configureInterpreters = { port ->
        }
        if ( interpreter.name == "jdbc") {
 
-          // configure hive jdbc interpreter
-          interpreter.properties['hive.url'] = 'jdbc:hive2://' + hiveHost + ':10000/default;ssl\u003dtrue;sslTrustStore\u003d/home/' + props.username + '/zeppelin_truststore.jks;trustStorePassword\u003dmypassword;'
-          interpreter.properties['hive.user'] = props.username
-          interpreter.properties['hive.password'] = props.password
+          if (hiveHost != null) { 
+              // configure hive jdbc interpreter
+              interpreter.properties['hive.url'] = 'jdbc:hive2://' + hiveHost + ':10000/default;ssl\u003dtrue;sslTrustStore\u003d/home/' + props.username + '/zeppelin_truststore.jks;trustStorePassword\u003dmypassword;'
+              interpreter.properties['hive.user'] = props.username
+              interpreter.properties['hive.password'] = props.password
+          }
 
-          // configure bigsql jdbc interpreter
-          interpreter.properties['bigsql.url'] = 'jdbc:db2://' + bigsqlHost + ':51000/bigsql:sslConnection\u003dtrue;sslTrustStoreLocation\u003d/home/biadmin/zeppelin_truststore.jks;Password\u003dmypassword;'
-          interpreter.properties['bigsql.user'] = props.username
-          interpreter.properties['bigsql.password'] = props.password
-          interpreter.properties['bigsql.driver'] = 'com.ibm.db2.jcc.DB2Driver'
+          if (bigsqlHost != null) {
+              // configure bigsql jdbc interpreter
+              interpreter.properties['bigsql.url'] = 'jdbc:db2://' + bigsqlHost + ':51000/bigsql:sslConnection\u003dtrue;sslTrustStoreLocation\u003d/home/biadmin/zeppelin_truststore.jks;Password\u003dmypassword;'
+              interpreter.properties['bigsql.user'] = props.username
+              interpreter.properties['bigsql.password'] = props.password
+              interpreter.properties['bigsql.driver'] = 'com.ibm.db2.jcc.DB2Driver'
+          }
 
           // configure jdbc interpreter dependencies
           interpreter.dependencies = '[{"groupArtifactVersion":"org.apache.hive:hive-jdbc:0.14.0","local":false},{"groupArtifactVersion":"org.apache.hadoop:hadoop-common:2.6.0","local":false,"exclusions":["jdk.tools:jdk.tools:jar:1.6"]},{"groupArtifactVersion":"/tmp/db2jcc.jar","local":false}]'
@@ -150,6 +165,13 @@ task Install (dependsOn: CreateTruststore) << {
     def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
     def zeppelin_port = matcher[0][1]
 
+    // convert scripts from dos2unix
+    ['zeppelin_install.sh', 'zeppelin_uninstall.sh', 'zeppelin_env.sh'].each { filename ->
+
+        def f = file("${projectDir}/${filename}")
+        f.text = f.text.replaceAll("\r\n", "\n")
+    }
+
     ssh.run {
         // remotes.bicluster is defined in shared/common-helpers.gradle
         session(remotes.bicluster) {
@@ -169,6 +191,10 @@ task Install (dependsOn: CreateTruststore) << {
 
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
+
+            // dos2unix incase users have edited files on windows
+            execute "sed -i 's/\r//' ./zeppelin_install.sh"
+            execute "sed -i 's/\r//' ./zeppelin_env.sh"
 
             put from: "${projectDir}/../../downloads/db2jcc.jar",
                 into: "/tmp/db2jcc.jar"
