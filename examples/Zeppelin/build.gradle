@@ -27,6 +27,8 @@ props.load(new FileInputStream("$projectDir/../../connection.properties"))
 
 def hiveHost = getMasters(props)['HIVE_SERVER'][0]
 
+
+
 task CreateTruststore << {
 
     if (!(new File("${projectDir}/../../certificate").exists())) {
@@ -58,6 +60,8 @@ task Uninstall << {
             put from: "${projectDir}/zeppelin_uninstall.sh", 
                 into: "./zeppelin_uninstall.sh"
 
+            // dos2unix incase users have edited on windows
+            execute "sed -i 's/\r//' ./zeppelin_uninstall.sh"
 
             execute "bash ./zeppelin_uninstall.sh"
         }
@@ -138,6 +142,13 @@ task Install (dependsOn: CreateTruststore) << {
     def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
     def zeppelin_port = matcher[0][1]
 
+    // convert scripts from dos2unix
+    ['zeppelin_install.sh', 'zeppelin_uninstall.sh', 'zeppelin_env.sh'].each { filename ->
+
+        def f = file("${projectDir}/${filename}")
+        f.text = f.text.replaceAll("\r\n", "\n")
+    }
+
     ssh.run {
         // remotes.bicluster is defined in shared/common-helpers.gradle
         session(remotes.bicluster) {
@@ -157,6 +168,10 @@ task Install (dependsOn: CreateTruststore) << {
 
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
+
+            // dos2unix incase users have edited files on windows
+            execute "sed -i 's/\r//' ./zeppelin_install.sh"
+            execute "sed -i 's/\r//' ./zeppelin_env.sh"
 
             // sparkR setup
 
