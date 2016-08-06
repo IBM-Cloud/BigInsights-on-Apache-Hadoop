@@ -26,6 +26,7 @@ Properties props = new Properties()
 props.load(new FileInputStream("$projectDir/../../connection.properties"))
 
 def hiveHost = getMasters(props)['HIVE_SERVER'][0]
+def bigsqlHost = getMasters(props)['BIGSQL_HEAD'][0]
 
 
 
@@ -105,11 +106,22 @@ def configureInterpreters = { port ->
           configureInterpreter(port, interpreter) 
        }
        if ( interpreter.name == "jdbc") {
-          interpreter.dependencies = '[{"groupArtifactVersion":"org.apache.hive:hive-jdbc:0.14.0","local":false},{"groupArtifactVersion":"org.apache.hadoop:hadoop-common:2.6.0","local":false,"exclusions":["jdk.tools:jdk.tools:jar:1.6"]}]'
+
+          // configure hive jdbc interpreter
           interpreter.properties['hive.url'] = 'jdbc:hive2://' + hiveHost + ':10000/default;ssl\u003dtrue;sslTrustStore\u003d/home/' + props.username + '/zeppelin_truststore.jks;trustStorePassword\u003dmypassword;'
           interpreter.properties['hive.user'] = props.username
           interpreter.properties['hive.password'] = props.password
-          configureInterpreter(port, interpreter) 
+
+          // configure bigsql jdbc interpreter
+          interpreter.properties['bigsql.url'] = 'jdbc:db2://' + bigsqlHost + ':51000/bigsql:sslConnection\u003dtrue;sslTrustStoreLocation\u003d/home/biadmin/zeppelin_truststore.jks;Password\u003dmypassword;'
+          interpreter.properties['bigsql.user'] = props.username
+          interpreter.properties['bigsql.password'] = props.password
+          interpreter.properties['bigsql.driver'] = 'com.ibm.db2.jcc.DB2Driver'
+
+          // configure jdbc interpreter dependencies
+          interpreter.dependencies = '[{"groupArtifactVersion":"org.apache.hive:hive-jdbc:0.14.0","local":false},{"groupArtifactVersion":"org.apache.hadoop:hadoop-common:2.6.0","local":false,"exclusions":["jdk.tools:jdk.tools:jar:1.6"]},{"groupArtifactVersion":"/tmp/db2jcc.jar","local":false}]'
+
+          configureInterpreter(port, interpreter)
        }
     }
 }
@@ -172,6 +184,9 @@ task Install (dependsOn: CreateTruststore) << {
             // dos2unix incase users have edited files on windows
             execute "sed -i 's/\r//' ./zeppelin_install.sh"
             execute "sed -i 's/\r//' ./zeppelin_env.sh"
+
+            put from: "${projectDir}/../../downloads/db2jcc.jar",
+                into: "/tmp/db2jcc.jar"
 
             // sparkR setup
 
