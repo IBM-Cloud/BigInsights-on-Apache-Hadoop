@@ -5,3 +5,4 @@
 .pydevproject
 .cache-main
 truststore.jks
+zeppelin_env.sh

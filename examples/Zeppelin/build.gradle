@@ -162,15 +162,13 @@ task Install (dependsOn: CreateTruststore) << {
 
     def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
 
+    if (!zeppelin_env.exists()) {
+        zeppelin_env.text = file("${projectDir}/zeppelin_env.sh_template").text
+    }
+
     def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
     def zeppelin_port = matcher[0][1]
 
-    // convert scripts from dos2unix
-    ['zeppelin_install.sh', 'zeppelin_uninstall.sh', 'zeppelin_env.sh'].each { filename ->
-
-        def f = file("${projectDir}/${filename}")
-        f.text = f.text.replaceAll("\r\n", "\n")
-    }
 
     ssh.run {
         // remotes.bicluster is defined in shared/common-helpers.gradle
