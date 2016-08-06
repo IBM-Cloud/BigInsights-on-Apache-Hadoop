@@ -22,7 +22,9 @@ Users will gain the most from these examples if they are:
 
 ### Install Zeppelin
 
-To install Zeppelin, in a command prompt window:
+To install Zeppelin, first copy the file `zeppelin_env.sh_template` to `zeppelin_env.sh`.  Ensure that the value for `ZEPPELIN_PORT` is set a port that is available on the cluster.  If other users have already installed Zeppelin on this cluster, you will need probably need to change the `ZEPPELIN_PORT`.
+
+Next open a command prompt window:
 
    - change into the directory containing this example and run gradle to execute the example
       - `./gradlew Install` (OS X / *nix)
