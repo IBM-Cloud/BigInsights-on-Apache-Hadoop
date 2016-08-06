@@ -152,5 +152,10 @@ Therefore, when you connect to this local URL you are really connecting to the z
 
 ## Limitations
 
-- current only the spark and bash interpreters are configured
-- currently only basic zeppelin spark configuration is performed: see [zeppelin_install.sh](./zeppelin_install.sh) for details.  If you would like Hbase support consider voting for this upstream [issue](https://issues.apache.org/jira/browse/ZEPPELIN-1252)
+- the following interpreters are configured:
+  - spark (pySpark and sparkR)
+  - livy (pySpark and sparkR)
+  - sh
+  - hive
+  - bigsql (if the cluster has bigsql installed)
+- each user needs to install zeppelin into their own account, by setting the ZEPPELIN_PORT to an available port on the cluster.
