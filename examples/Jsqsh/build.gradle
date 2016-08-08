@@ -1,0 +1,119 @@
+plugins {
+  id 'groovy'
+  id 'org.hidetake.ssh' version '1.5.0'
+}
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+def hostname = getBigSqlHeadHost(props)
+if (hostname == null) {
+    hostname = getMasterManagerHost(props)
+}
+
+
+task('DownloadJsqsh', type:Copy) {
+
+    def url = 'https://github.com/scgray/jsqsh/releases/download/jsqsh-2.2/jsqsh-2.2-bin.zip'
+
+    def f = file('jsqsh-2.2-bin.zip')
+    if (!f.exists()) {
+        new URL(url).withInputStream{ i -> f.withOutputStream{ it << i }}
+    }
+
+    from zipTree(f) 
+    into projectDir
+}
+
+task CreateKeyStore {
+
+    if (!(file("${projectDir}/../../certificate").exists())) {
+        throw new GradleException("'certificate' file could not be found in ${projectDir.parentFile.parentFile}")
+    }
+
+    ext.certFile = file("${projectDir}/../../certificate")
+    ext.keyStore = new File(buildDir, 'generated')
+
+    inputs.file certFile
+    outputs.dir keyStore
+
+    doLast {
+        keyStore.mkdirs()
+
+        // import the BigInsights manager certificate
+        ant.exec(executable: "${getKeytoolPath()}", dir:keyStore) {
+            arg(line: '-import -trustcacerts -alias biginsights -file ' + certFile + ' -keystore ' + keyStore + '/truststore.jks -storepass mypassword -noprompt')
+        }
+    }
+}
+
+task('CreateConfig') {
+
+    mkdir('config')
+
+    file('config/drivers.xml').text = """
+    <Drivers>
+        <Driver name="db2"
+                   url="jdbc:db2://${hostname}:51000/bigsql"
+                   class="com.ibm.db2.jcc.DB2Driver"
+                   target="IBM Data Server (DB2, Informix, Big SQL)"
+                   analyzer="org.sqsh.analyzers.PLSQLAnalyzer"
+                   normalizer="org.sqsh.normalizer.UpperCaseNormalizer">
+              <Classpath><![CDATA[${projectDir}/../../downloads/]]></Classpath>
+              <CurrentSchemaQuery><![CDATA[VALUES (TRIM(CURRENT SCHEMA))]]></CurrentSchemaQuery>
+              <Variable name="server"><![CDATA[localhost]]></Variable>
+              <Variable name="port"><![CDATA[50000]]></Variable>
+              <Variable name="db"><![CDATA[changeme]]></Variable>
+              <Property name="retrieveMessagesFromServerOnGetMessage"><![CDATA[true]]></Property>
+           </Driver>
+    </Drivers>"""
+
+    file('config/connections.xml').text = """
+    <connections>
+        <connection name="biginsights"
+                       driver="db2"
+                       server="${hostname}"
+                       port="51000" >
+          <username><![CDATA[${props.username}]]></username>
+          <password encrypted="false"><![CDATA[${props.password}]]></password>
+          <catalog><![CDATA[bigsql]]></catalog>
+          <properties>
+              <property name="sslConnection"><![CDATA[True]]></property>
+              <property name="sslTrustStoreLocation"><![CDATA[${buildDir.absolutePath.replaceAll(/\\+/, '/')}/generated/truststore.jks]]></property>
+              <property name="Password"><![CDATA[mypassword]]></property>
+          </properties>
+       </connection>
+    </connections>"""
+
+}
+
+task('SetupJsqsh') {
+    dependsOn DownloadJsqsh, CreateConfig, CreateKeyStore
+
+    doLast {
+        println "*******************************************************************"
+        println "Run jsqsh session with:"
+        println ""
+        println "  ./jsqsh-2.2/bin/jsqsh biginsights -C config [other jsqsh options]"
+        println ""
+        println "Run script:" 
+        println ""
+        println "  ./jsqsh-2.2/bin/jsqsh biginsights -C config -e -i simple_select.sql"
+        println "*******************************************************************"
+    }
+}
+
+task('Help') {
+    dependsOn SetupJsqsh
+}
+
+task('RunJsqsh', type:Exec) {
+
+    dependsOn DownloadJsqsh, CreateConfig
+
+    commandLine "${projectDir}/jsqsh-2.2/bin/jsqsh","-C","${projectDir}/config/"
+    standardInput = System.in
+}
