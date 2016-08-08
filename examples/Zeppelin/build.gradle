@@ -280,14 +280,15 @@ task Run << {
             if (console) {
                 def output = "\n\n" +
                     "SSH forwarding localhost:${port} -> BigInsights zeppelin localhost:${zeppelin_port}\n\n" +
-                    "You can now access zeppelin from your local machine using the URL: http://localhost:${port}.\n\n" +
+                    "You can now access zeppelin from your local machine using the URL: http://localhost:${port}\n\n" +
                     "\n" +
                     "Press ENTER or CTRL+C to quit.\n" +
                     "\n" +
                     "NOTE: - If you quit you will lose your connection to Zeppelin.\n" +
                     "      - After quitting you can execute 'Run' again to connect to Zeppelin.\n" +
-                    "      - Every time you execute 'Run' you will get a different port to\n" +
-                    "        connect to on your local machine.\n" +
+                    "      - Gradle will attempt to bind to port 12345 on your local machine.\n" +
+                    "        If port 12345 is not available, gradle will automatically allocate a\n" +
+                    "        a local port.\n" +
                     "      - You can set the local port with the gradle '-P' argument, E.g.\n" +
                     "         './gradlew Run -PZEP_PORT=23456'\n" +
                     "        make sure port you specify is valid and not occupied on your system.\n\n" 
