@@ -46,6 +46,12 @@ This page lists all of the examples.
 
 *********************************************************************
 
+### Jsqsh
+
+- Download and configure Jsqsh shell for Big SQL [[Jsqsh](./Jsqsh/README.md)]
+
+*********************************************************************
+
 ####  Knox
 
 - Run a knox shell client session [[Knoxshell](./Knoxshell/README.md)]
