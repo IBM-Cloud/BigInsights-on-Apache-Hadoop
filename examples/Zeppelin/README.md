@@ -138,6 +138,8 @@ You should also be able to see the above spark job running on the spark cluster.
 
 ### Test Zeppelin with SparkR
 
+*This is a Technology Preview.*
+
 Similar to the instructions for 'Test Zeppelin with Pyspark', there is a notebook 'SparkR Test'.
 
 ## Decomposition Instructions
