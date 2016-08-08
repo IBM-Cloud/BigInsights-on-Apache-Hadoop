@@ -261,13 +261,20 @@ task Run << {
             // make sure zeppelin is running
             execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh status || ./${ZEPPELIN}/bin/zeppelin-daemon.sh start"
 
-            def local_port = 0 // automatically allocate a port
+            def local_port = 12345
 
             if (project.hasProperty('ZEP_PORT')) {
                 local_port = project.property('ZEP_PORT').toInteger()
             }
 
-            def port = forwardLocalPort port: local_port, hostPort: zeppelin_port.toInteger()
+            def port
+            try {
+                port = forwardLocalPort port: local_port, hostPort: zeppelin_port.toInteger()
+            } catch (Exception e) {
+                // bind to random port
+                port = forwardLocalPort port: 0, hostPort: zeppelin_port.toInteger()
+                println ">> Could not bind to ${local_port}, automatically found free port ${port}"
+            }
 
             def console = System.console()
             if (console) {
@@ -282,8 +289,8 @@ task Run << {
                     "      - Every time you execute 'Run' you will get a different port to\n" +
                     "        connect to on your local machine.\n" +
                     "      - You can set the local port with the gradle '-P' argument, E.g.\n" +
-                    "         './gradlew Run -PZEP_PORT=12345'\n" +
-                    "        make sure port you specify is valid and not occupied on your system.\n\n"
+                    "         './gradlew Run -PZEP_PORT=23456'\n" +
+                    "        make sure port you specify is valid and not occupied on your system.\n\n" 
                 console.readLine(output)
             } else {
                 logger.error "Cannot get console."
