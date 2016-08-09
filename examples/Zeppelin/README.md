@@ -138,7 +138,7 @@ You should also be able to see the above spark job running on the spark cluster.
 
 ### Test Zeppelin with SparkR
 
-*This is a Technology Preview.*
+*This is a Technology Preview.  Note that SparkR is only available on BigInsights 4.2 Clusters.*
 
 Similar to the instructions for 'Test Zeppelin with Pyspark', there is a notebook 'SparkR Test'.
 
