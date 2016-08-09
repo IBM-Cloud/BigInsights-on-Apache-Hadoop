@@ -46,7 +46,7 @@ This page lists all of the examples.
 
 *********************************************************************
 
-### Jsqsh
+#### Jsqsh
 
 - Download and configure Jsqsh shell for Big SQL [[Jsqsh](./Jsqsh/README.md)]
 
@@ -81,7 +81,7 @@ This page lists all of the examples.
 
 #### Zeppelin
 
-- Install, configure and run Zeppelin. Run Pyspark and SparkR notebooks  [[Zeppelin](./Zeppelin/README.md)]
+- Install, configure and run Zeppelin. Run Pyspark notebook  [[Zeppelin](./Zeppelin/README.md)]
 
 *********************************************************************
 
