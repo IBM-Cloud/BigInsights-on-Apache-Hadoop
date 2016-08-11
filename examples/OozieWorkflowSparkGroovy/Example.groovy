@@ -41,44 +41,43 @@ biVersion = json.FileStatuses.FileStatus.pathSuffix[0]
 sparkAssyJar = "/iop/apps/${biVersion}/spark/jars/spark-assembly.jar"
 
 definition = """\
-<workflow-app xmlns="uri:oozie:workflow:0.2" name="wordcount-workflow">
-    <start to="root-node"/>
-    <action name="root-node">
-        <java>
-            <job-tracker>\${jobTracker}</job-tracker>
-            <name-node>\${nameNode}</name-node>
-            <main-class>org.apache.spark.deploy.SparkSubmit</main-class>
-            <arg>--class</arg>
-            <arg>org.apache.spark.examples.WordCount</arg>
-            <arg>--deploy-mode</arg>
-            <arg>cluster</arg>
-            <arg>--master</arg>
-            <arg>yarn-cluster</arg>
-            <arg>--queue</arg>
-            <arg>default</arg>
-            <arg>--num-executors</arg>
-            <arg>2</arg>
-            <arg>--executor-cores</arg>
-            <arg>2</arg>
-            <arg>spark-wordcount-example.jar</arg>
-            <arg>\${inputDir}/FILE</arg>
-            <arg>\${outputDir}</arg>
-            <file>\${jobDir}/lib/spark-wordcount-example.jar</file>
-            <file>${sparkAssyJar}</file>
-            <capture-output/>
-        </java>
-        <ok to="end"/>
-        <error to="fail"/>
-    </action>
-    <kill name="fail">
-        <message>Java failed, error message[\${wf:errorMessage(wf:lastErrorNode())}]</message>
-    </kill>
-    <end name="end"/>
+<workflow-app xmlns='uri:oozie:workflow:0.5' name='SparkWordCount'>
+ <start to='spark-node' />
+  <action name='spark-node'>
+   <spark xmlns="uri:oozie:spark-action:0.1">
+    <job-tracker>\${jobTracker}</job-tracker>
+    <name-node>\${nameNode}</name-node>
+    <master>\${master}</master>
+    <name>Spark-Wordcount</name>
+    <class>org.apache.spark.examples.WordCount</class>
+    <jar>\${sparkAssyJar},\${jobDir}/lib/spark-wordcount-example.jar</jar>
+    <spark-opts>--conf spark.driver.extraJavaOptions=-Diop.version=4.2.0.0</spark-opts>
+    <arg>\${inputDir}/FILE</arg>
+    <arg>\${outputDir}</arg>
+    <capture-output/>
+   </spark>
+   <ok to="end" />
+   <error to="fail" />
+  </action>
+  <kill name="fail">
+   <message>Workflow failed, error
+    message[\${wf:errorMessage(wf:lastErrorNode())}]
+   </message>
+  </kill>
+ <end name='end' />
 </workflow-app>
 """
 
 configuration = """\
 <configuration>
+    <property>
+        <name>master</name>
+        <value>local</value>
+    </property>
+    <property>
+        <name>queueName</name>
+        <value>default</value>
+    </property>
     <property>
         <name>user.name</name>
         <value>default</value>
