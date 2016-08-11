@@ -118,6 +118,11 @@ configuration = """\
         <name>hdfsSparkAssyJar</name>
         <value>$hdfsSparkAssyJar</value>
     </property>
+    <property>
+        <name>oozie.use.system.libpath</name>
+        <value>true</value>
+    </property>
+
 </configuration>
 """
 
@@ -160,7 +165,6 @@ if( status == "SUCCEEDED" ) {
 
   println "Spark output:"
   println Hdfs.get( session ).from( jobDir + "/output/part-00000" ).now().string
-  println Hdfs.get( session ).from( jobDir + "/output/part-00001" ).now().string
 }
 
 session.shutdown()
