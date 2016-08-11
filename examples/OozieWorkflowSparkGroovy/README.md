@@ -32,7 +32,7 @@ Developers will gain the most from these examples if they are:
 
 This example consists of three parts:
 
-- [WordCount.java](./src/main/java/org/apache/spark/examples/WordCount.java - Spark Java code
+- [WordCount.java](./src/main/java/org/apache/spark/examples/WordCount.java) - Spark Java code
 - [Example.groovy](./Example.groovy) - Groovy script to submit the Map/Reduce job to Oozie
 - [build.gradle](./build.gradle) - Gradle script to compile and package the Map/Reduce code and execute the Example.groovy script 
 
