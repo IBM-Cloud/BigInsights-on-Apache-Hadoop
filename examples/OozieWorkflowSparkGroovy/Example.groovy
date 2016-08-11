@@ -50,7 +50,7 @@ definition = """\
     <master>\${master}</master>
     <name>Spark-Wordcount</name>
     <class>org.apache.spark.examples.WordCount</class>
-    <jar>\${sparkAssyJar},\${jobDir}/lib/spark-wordcount-example.jar</jar>
+    <jar>${sparkAssyJar},\${jobDir}/lib/spark-wordcount-example.jar</jar>
     <spark-opts>--conf spark.driver.extraJavaOptions=-Diop.version=4.2.0.0</spark-opts>
     <arg>\${inputDir}/FILE</arg>
     <arg>\${outputDir}</arg>
@@ -67,6 +67,8 @@ definition = """\
  <end name='end' />
 </workflow-app>
 """
+
+println( definition )
 
 configuration = """\
 <configuration>
@@ -109,6 +111,7 @@ configuration = """\
 </configuration>
 """
 
+println( configuration )
 
 println "Delete " + jobDir + ": " + Hdfs.rm( session ).file( jobDir ).recursive().now().statusCode
 println "Mkdir " + jobDir + ": " + Hdfs.mkdir( session ).dir( jobDir ).now().statusCode
