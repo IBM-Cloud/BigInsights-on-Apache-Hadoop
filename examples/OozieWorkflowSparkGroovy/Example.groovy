@@ -30,7 +30,9 @@ password = env.password
 
 inputFile = "LICENSE"
 jobDir = "/user/" + username + "/test"
-jarFile = "./build/libs/OozieWorkflowSparkGroovy.jar"
+
+localWordCountJar = "./build/libs/OozieWorkflowSparkGroovy.jar"
+hdfsWordCountJar = "${jobDir}/lib/OozieWorkflowSparkGroovy.jar"
 
 session = Hadoop.login( gateway, username, password )
 
@@ -38,7 +40,8 @@ session = Hadoop.login( gateway, username, password )
 dirText = Hdfs.ls( session ).dir( "/iop/apps/" ).now().string
 json = (new JsonSlurper()).parseText( dirText )
 biVersion = json.FileStatuses.FileStatus.pathSuffix[0]
-sparkAssyJar = "/iop/apps/${biVersion}/spark/jars/spark-assembly.jar"
+
+hdfsSparkAssyJar = "/iop/apps/${biVersion}/spark/jars/spark-assembly.jar"
 
 definition = """\
 <workflow-app xmlns='uri:oozie:workflow:0.5' name='SparkWordCount'>
@@ -50,11 +53,10 @@ definition = """\
     <master>\${master}</master>
     <name>Spark-Wordcount</name>
     <class>org.apache.spark.examples.WordCount</class>
-    <jar>${sparkAssyJar},\${jobDir}/lib/spark-wordcount-example.jar</jar>
+    <jar>\${hdfsSparkAssyJar},\${hdfsWordCountJar}</jar>
     <spark-opts>--conf spark.driver.extraJavaOptions=-Diop.version=4.2.0.0</spark-opts>
     <arg>\${inputDir}/FILE</arg>
     <arg>\${outputDir}</arg>
-    <capture-output/>
    </spark>
    <ok to="end" />
    <error to="fail" />
@@ -105,8 +107,16 @@ configuration = """\
         <value>$jobDir/output</value>
     </property>
     <property>
+        <name>hdfsWordCountJar</name>
+        <value>$hdfsWordCountJar</value>
+    </property>
+    <property>
         <name>oozie.wf.application.path</name>
         <value>$jobDir</value>
+    </property>
+    <property>
+        <name>hdfsSparkAssyJar</name>
+        <value>$hdfsSparkAssyJar</value>
     </property>
 </configuration>
 """
@@ -119,8 +129,8 @@ println "Mkdir " + jobDir + ": " + Hdfs.mkdir( session ).dir( jobDir ).now().sta
 putData = Hdfs.put(session).file( inputFile ).to( jobDir + "/input/FILE" ).later() {
   println "Put " + jobDir + "/input/FILE: " + it.statusCode }
 
-putJar = Hdfs.put(session).file( jarFile ).to( jobDir + "/lib/spark-wordcount-example.jar" ).later() {
-  println "Put " + jobDir + "/lib/spark-wordcount-example.jar:" + it.statusCode }
+putJar = Hdfs.put(session).file( localWordCountJar ).to( hdfsWordCountJar ).later() {
+  println "Put " + hdfsWordCountJar + " " + it.statusCode }
 
 putWorkflow = Hdfs.put(session).text( definition ).to( jobDir + "/workflow.xml" ).later() {
   println "Put " + jobDir + "/workflow.xml: " + it.statusCode }
