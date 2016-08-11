@@ -70,7 +70,8 @@ definition = """\
 </workflow-app>
 """
 
-println( definition )
+// uncomment to debug the xml
+// println( definition )
 
 configuration = """\
 <configuration>
@@ -126,27 +127,28 @@ configuration = """\
 </configuration>
 """
 
-println( configuration )
+// uncomment to debug the xml
+// println( configuration )
 
-println "Delete " + jobDir + ": " + Hdfs.rm( session ).file( jobDir ).recursive().now().statusCode
-println "Mkdir " + jobDir + ": " + Hdfs.mkdir( session ).dir( jobDir ).now().statusCode
+println "[Example.groovy] Delete " + jobDir + ": " + Hdfs.rm( session ).file( jobDir ).recursive().now().statusCode
+println "[Example.groovy] Mkdir " + jobDir + ": " + Hdfs.mkdir( session ).dir( jobDir ).now().statusCode
 
 putData = Hdfs.put(session).file( inputFile ).to( jobDir + "/input/FILE" ).later() {
-  println "Put " + jobDir + "/input/FILE: " + it.statusCode }
+  println "[Example.groovy] Put " + jobDir + "/input/FILE: " + it.statusCode }
 
 putJar = Hdfs.put(session).file( localWordCountJar ).to( hdfsWordCountJar ).later() {
-  println "Put " + hdfsWordCountJar + " " + it.statusCode }
+  println "[Example.groovy] Put " + hdfsWordCountJar + " " + it.statusCode }
 
 putWorkflow = Hdfs.put(session).text( definition ).to( jobDir + "/workflow.xml" ).later() {
-  println "Put " + jobDir + "/workflow.xml: " + it.statusCode }
+  println "[Example.groovy] Put " + jobDir + "/workflow.xml: " + it.statusCode }
 
-println "Uploading jar file may take some time..."
+println "[Example.groovy] Uploading jar file may take some time..."
 session.waitFor( putWorkflow, putData, putJar )
 
 jobId = Workflow.submit(session).text( configuration ).now().jobId
-println "Submitted job: " + jobId
+println "[Example.groovy] Submitted job: " + jobId
 
-println "Polling up to 300s for job completion..."
+println "[Example.groovy] Polling up to 300s for job completion..."
 status = "RUNNING";
 count = 0;
 while( status == "RUNNING" && count++ < 300 ) {
@@ -156,14 +158,14 @@ while( status == "RUNNING" && count++ < 300 ) {
   print "."; System.out.flush();
 }
 println ""
-println "Job status: " + status
+println "[Example.groovy] Job status: " + status
 
 if( status == "SUCCEEDED" ) {
   text = Hdfs.ls( session ).dir( jobDir + "/output" ).now().string
   json = (new JsonSlurper()).parseText( text )
   println json.FileStatuses.FileStatus.pathSuffix
 
-  println "Spark output:"
+  println "[Example.groovy] Spark output:"
   println Hdfs.get( session ).from( jobDir + "/output/part-00000" ).now().string
 }
 
