@@ -44,10 +44,31 @@ To run the example, open a command prompt window:
    - some output from running the command on my machine is shown below 
 
 ```bash
-biginsight-bluemix-docs $ cd examples/OozieWorkflowMapSparkGroovy
-biginsight-bluemix-docs/examples/OozieWorkflowSparkGroovy $ ./gradlew Example
-
-TODO ... paste output
+BigInsights-on-Apache-Hadoop $ cd examples/OozieWorkflowMapSparkGroovy
+BigInsights-on-Apache-Hadoop/examples/OozieWorkflowSparkGroovy $ ./gradlew Example
+:compileJava UP-TO-DATE
+:compileGroovy
+warning: [options] bootstrap class path not set in conjunction with -source 1.7
+1 warning
+:processResources UP-TO-DATE
+:classes
+:jar
+:Example
+[Example.groovy] Delete /user/snowch/test: 200
+[Example.groovy] Mkdir /user/snowch/test: 200
+[Example.groovy] Uploading jar file may take some time...
+[Example.groovy] Put /user/snowch/test/workflow.xml: 201
+[Example.groovy] Put /user/snowch/test/input/FILE: 201
+[Example.groovy] Put /user/snowch/test/lib/OozieWorkflowSparkGroovy.jar 201
+[Example.groovy] Submitted job: 0000006-160804212652051-oozie-oozi-W
+[Example.groovy] Polling up to 300s for job completion...
+...
+(compliance,1)
+(comment,1)
+(subsequently,1)
+(replaced,1)
+(mechanical,1)
+(Contributor,8)
 ```
 
 The output above shows:
