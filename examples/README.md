@@ -62,6 +62,7 @@ This page lists all of the examples.
 
 - Compile a Map/Reduce Java application and submit it to Oozie using Groovy [[OozieWorkflowMapReduceGroovy](./OozieWorkflowMapReduceGroovy/README.md)]
 - Compile a Map/Reduce Java application and submit it to Oozie using cURL [[OozieWorkflowMapReduceCurl](./OozieWorkflowMapReduceCurl/README.md)]
+- Compile a Spark Java application and submit it to Oozie using Groovy [[OozieWorkflowSparkGroovy](./OozieWorkflowSparkGroovy/README.md)]
 
 *********************************************************************
 
