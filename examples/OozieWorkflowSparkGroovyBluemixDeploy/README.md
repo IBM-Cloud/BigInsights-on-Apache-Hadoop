@@ -1,5 +1,7 @@
 ## Overview
 
+This example is a preview - please report any issues with documentation or technical issues on [stackoverflow](https://stackoverflow.com/questions/tagged/biginsight-examples).
+
 This example extends [OozieWorkflowSparkGroovy](../OozieWorkflowSparkGroovy) and shows you how you could deploy the Oozie code to Bluemix.
 
 
