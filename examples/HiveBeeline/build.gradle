@@ -3,6 +3,11 @@ plugins {
   id 'org.hidetake.ssh' version '1.5.0'
 }
 
+import org.apache.tools.ant.taskdefs.condition.Os
+if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    throw new GradleException("You appear to be running on a Windows machine.  This example does not support Windows.")
+}
+
 repositories {
     mavenCentral()
 }
