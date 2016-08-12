@@ -84,3 +84,9 @@ The output above shows:
 
 All code is well commented and it is suggested that you browse the build.gradle and *.groovy scripts to understand in more detail how they work.
 
+## Help
+
+If you run into the following issue, see the [FAQ](../../FAQ.md)
+```
+> Failed to create MD5 hash for ...
+```
