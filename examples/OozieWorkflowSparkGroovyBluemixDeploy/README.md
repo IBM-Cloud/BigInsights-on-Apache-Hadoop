@@ -58,7 +58,7 @@ To run the example on Bluemix, open a command prompt window:
 
 ## Decomposition Instructions
 
-The examples uses a gradle build file [build.gradle](./build.gradle) when you run `./gradlew` or `gradle.bat`.
+The examples uses gradle build.gradle files to control build, deployment, etc., when you run `./gradlew` or `gradle.bat`.
 
 More info to come ...
 
