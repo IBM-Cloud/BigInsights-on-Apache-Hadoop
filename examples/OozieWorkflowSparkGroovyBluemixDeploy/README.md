@@ -27,14 +27,14 @@ Developers will gain the most from these examples if they are:
 
 This example consists of two parts separated into two directories:
 
-- [hadoop_deploy](./hadoop_deploy) : compile, package and upload the spark code and oozie workflow file to webHDFS
-- [bluemix_deploy](./bluemix_deploy) : compile, package and upload the spring boot oozie client application to Bluemix
+- [hadoop-deploy](./hadoop-deploy) : compile, package and upload the spark code and oozie workflow file to webHDFS
+- [bluemix-deploy](./bluemix-deploy) : compile, package and upload the spring boot oozie client application to Bluemix
 
 ### Hadoop Deploy
 
 To run the example, open a command prompt window:
 
-   - change into the hadoop_deploy directory and run:
+   - change into the hadoop-deploy directory and run:
       - `./gradlew Setup` (OS X / *nix)
       - `gradlew.bat Setup` (Windows)
 
@@ -42,14 +42,14 @@ To run the example, open a command prompt window:
 
 To run the example locally, open a command prompt window:
 
-   - change into the bluemix_deploy directory and run:
+   - change into the bluemix-deploy directory and run:
       - `./gradlew RunLocally` (OS X / *nix)
       - `gradlew.bat RunLocally` (Windows)
    - follow the instructions in the output
 
 To run the example on Bluemix, open a command prompt window:
 
-   - change into the bluemix_deploy directory and run:
+   - change into the bluemix-deploy directory and run:
       - `./gradlew Deploy` (OS X / *nix)
       - `gradlew.bat Deploy` (Windows)
    - follow the instructions in the output
