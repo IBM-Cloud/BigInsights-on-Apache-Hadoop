@@ -60,6 +60,8 @@ warning: [options] bootstrap class path not set in conjunction with -source 1.7
 [Example.groovy] Put /user/snowch/test/workflow.xml: 201
 [Example.groovy] Put /user/snowch/test/input/FILE: 201
 [Example.groovy] Put /user/snowch/test/lib/OozieWorkflowSparkGroovy.jar 201
+[Example.groovy] Downloading spark assembly jar file, may take some time...
+[Example.groovy] Uploading spark assembly jar file to job lib dir, may take some time...
 [Example.groovy] Submitted job: 0000006-160804212652051-oozie-oozi-W
 [Example.groovy] Polling up to 300s for job completion...
 ...
@@ -93,6 +95,8 @@ The [Example.groovy](./Example.groovy) script performs the following:
 - Upload the workflow XML file over WebHDFS
 - Upload an Apache 2.0 LICENSE file over WebHDFS
 - Upload the jar file (containing the Java Spark code) over WebHDFS
+- Download the spark-assembly jar file over WebHdfs
+- Upload the spark-assembly jar file over WebHDFS to the job lib directory
 - Submit the Oozie workflow job using Knox REST API for Oozie
 - Every second, check the status of the Oozie workflow job using Knox REST API for Oozie
 - When the Oozie workflow job successfully finishes, download the wordcount output from the Java Spark job
