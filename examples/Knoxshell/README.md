@@ -34,7 +34,7 @@ The shell logs in to the BigInsights cluster and saves the session in the variab
 
 ```bash
 $ cd examples/KnoxShell
-$ ./gradlew -q --no-daemon shell`
+$ ./gradlew -q --no-daemon shell
 This is a gradle Application Shell.
 You can import your application classes and act on them.
 import org.apache.hadoop.gateway.shell.Hadoop;import org.apache.hadoop.gateway.shell.hdfs.Hdfs;import org.apache.hadoop.gateway.shell.job.Job;import org.apache.hadoop.gateway.shell.workflow.Workflow;import org.apache.hadoop.gateway.shell.yarn.Yarn;import groovy.json.JsonSlurper;import java.util.concurrent.TimeUnit;
