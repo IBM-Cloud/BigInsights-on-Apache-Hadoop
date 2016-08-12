@@ -79,7 +79,8 @@ task ('Deploy') << {
     cf set-env \$APPNAME gateway ${props.gateway}
     cf set-env \$APPNAME username ${props.username}
     cf set-env \$APPNAME password ${props.password}
-    cf push    \$APPNAME -p build/libs/ETL_Service-0.1.0.jar
+
+    cf push    \$APPNAME -p build/libs/ETL_Service-0.1.0.jar -b https://github.com/cloudfoundry/java-buildpack
     """
 }
 

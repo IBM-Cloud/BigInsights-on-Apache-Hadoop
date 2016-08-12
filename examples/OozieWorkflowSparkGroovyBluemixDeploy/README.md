@@ -54,8 +54,6 @@ To run the example on Bluemix, open a command prompt window:
       - `gradlew.bat Deploy` (Windows)
    - follow the instructions in the output
 
-There is an issue when deploying to Bluemix as can be seen here: http://stackoverflow.com/questions/38921249/rsa-premaster-secret-error-when-using-webhdfs-from-biginsights
- 
 ## Decomposition Instructions
 
 The examples uses a gradle build file [build.gradle](./build.gradle) when you run `./gradlew` or `gradle.bat`.
