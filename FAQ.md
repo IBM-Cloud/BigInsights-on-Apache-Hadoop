@@ -2,6 +2,8 @@
 ### FAQ
 *********************************************************************
 
+This document contains some frequently asked questions.  If these do not answer your question, please post your question on [Stack Overflow](https://stackoverflow.com/questions/tagged/biginsight-examples)
+
 - [gradlew: line 2: $'\r': command not found](./FAQ.md#gradlew-line-2-r-command-not-found)
 - [Failed to create MD5 hash for file](./FAQ.md#failed-to-create-md5-hash-for-file)
 - [Squirrel connection error - SSLHandshakeException: sun.security.validator.ValidatorException: PKIX path building failed](./FAQ.md#squirrel-connection-error---sslhandshakeexception-sunsecurityvalidatorvalidatorexception-pkix-path-building-failed)
