@@ -32,6 +32,7 @@ inputFile = "LICENSE"
 jobDir = "/user/" + username + "/test"
 
 localWordCountJar = "./build/libs/OozieWorkflowSparkGroovy.jar"
+
 hdfsWordCountJar = "${jobDir}/lib/OozieWorkflowSparkGroovy.jar"
 
 session = Hadoop.login( gateway, username, password )
@@ -51,9 +52,10 @@ definition = """\
     <job-tracker>\${jobTracker}</job-tracker>
     <name-node>\${nameNode}</name-node>
     <master>\${master}</master>
+    <mode>\${mode}</mode>
     <name>Spark-Wordcount</name>
     <class>org.apache.spark.examples.WordCount</class>
-    <jar>\${hdfsSparkAssyJar},\${hdfsWordCountJar}</jar>
+    <jar>\${nameNode}/\${hdfsWordCountJar}</jar>
     <spark-opts>--conf spark.driver.extraJavaOptions=-Diop.version=4.2.0.0</spark-opts>
     <arg>\${inputDir}/FILE</arg>
     <arg>\${outputDir}</arg>
@@ -77,7 +79,11 @@ configuration = """\
 <configuration>
     <property>
         <name>master</name>
-        <value>local</value>
+        <value>yarn-master</value>
+    </property>
+    <property>
+        <name>mode</name>
+        <value>cluster</value>
     </property>
     <property>
         <name>queueName</name>
@@ -116,10 +122,6 @@ configuration = """\
         <value>$jobDir</value>
     </property>
     <property>
-        <name>hdfsSparkAssyJar</name>
-        <value>$hdfsSparkAssyJar</value>
-    </property>
-    <property>
         <name>oozie.use.system.libpath</name>
         <value>true</value>
     </property>
@@ -144,6 +146,14 @@ putWorkflow = Hdfs.put(session).text( definition ).to( jobDir + "/workflow.xml" 
 
 println "[Example.groovy] Uploading jar file may take some time..."
 session.waitFor( putWorkflow, putData, putJar )
+
+// Need spark-assembly.jar in oozie lib path.
+// We could update the shared oozie lib but requires to copy lib and update sharedlib.
+// One way is to add the jar to lib/ directory under the oozie job directory
+println "[Example.groovy] Downloading spark assembly jar file, may take some time..."
+Hdfs.get( session ).file( "spark-assembly.jar" ).from( hdfsSparkAssyJar ).now()
+println "[Example.groovy] Uploading spark assembly jar file to job lib dir, may take some time..."
+Hdfs.put(session).file( "spark-assembly.jar" ).to( jobDir + "/lib/spark-assembly.jar" ).now() 
 
 jobId = Workflow.submit(session).text( configuration ).now().jobId
 println "[Example.groovy] Submitted job: " + jobId

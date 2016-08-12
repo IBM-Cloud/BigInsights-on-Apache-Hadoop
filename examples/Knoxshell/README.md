@@ -34,7 +34,7 @@ The shell logs in to the BigInsights cluster and saves the session in the variab
 
 ```bash
 $ cd examples/KnoxShell
-$ ./gradlew -q --no-daemon shell`
+$ ./gradlew -q --no-daemon shell
 This is a gradle Application Shell.
 You can import your application classes and act on them.
 import org.apache.hadoop.gateway.shell.Hadoop;import org.apache.hadoop.gateway.shell.hdfs.Hdfs;import org.apache.hadoop.gateway.shell.job.Job;import org.apache.hadoop.gateway.shell.workflow.Workflow;import org.apache.hadoop.gateway.shell.yarn.Yarn;import groovy.json.JsonSlurper;import java.util.concurrent.TimeUnit;
@@ -74,5 +74,5 @@ The examples uses a gradle build file [build.gradle](./build.gradle) when you ru
 - Start knox shell and instanciate the session against your cluster
 - Provide shell prompt for further command to be entered by user. Type `exit` to terminate the session.
 
-All code is well commented and it is suggested that you browse the build.gradle and *.groovy scripts to understand in more detail how they work.
+All code is well commented and it is suggested that you browse the build.gradle to understand in more detail how it works.
 

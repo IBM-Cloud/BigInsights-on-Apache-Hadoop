@@ -225,7 +225,7 @@ task Install (dependsOn: CreateTruststore) << {
             //       we should have a better mechanism than sleep for ensuring port
             //       forwarding is available
 
-            sleep(5000)
+            sleep(10000)
 
             configureInterpreters(local_port)
 
