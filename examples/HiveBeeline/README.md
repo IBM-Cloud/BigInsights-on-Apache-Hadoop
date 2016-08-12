@@ -92,3 +92,6 @@ The example uses a gradle build file [build.gradle](./build.gradle) when you run
 
 All code is well commented and it is suggested that you browse the build.gradle and *.groovy scripts to understand in more detail how they work.
 
+## Improvement Ideas
+
+To support Windows, it would be better if the build script downloads Hive 2 and configures it for the user similar to the approach taken for setting up SquirrelSQL in the [SquirrelSQL Example](../SquirrelSQL/build.gradle)
