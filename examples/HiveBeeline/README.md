@@ -19,7 +19,9 @@ Developers will gain the most from these examples if they are:
 
 ## Example Requirements
 
-Your have met the [pre-requisites](../../README.md#pre-requisites) and have followed the [setup instructions](../../README.md#setup-instructions) in the top level [README](../../README.md)
+- You meet the [pre-requisites](../../README.md#pre-requisites) in the top level [README](../../README.md)
+- You have followed the [setup instructions](../../README.md#setup-instructions) in the top level [README](../../README.md)
+- You are running on a OSX or Linux machine
 
 Specificaly, ensure you have run from top level repo directory the following tasks:
 - `./gradlew DownloadCertificate` - to get SSL certificate
