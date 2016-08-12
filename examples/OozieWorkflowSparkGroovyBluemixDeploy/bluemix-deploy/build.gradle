@@ -1,0 +1,81 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.3.RELEASE")
+    }
+}
+
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'spring-boot'
+apply plugin: 'eclipse'
+
+
+jar {
+    baseName = 'ETL_Service'
+    version =  '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    compile("org.codehaus.groovy:groovy-all:2.2.1")
+    compile("org.springframework.boot:spring-boot-starter-web:1.2.3.RELEASE")
+    compile("org.thymeleaf:thymeleaf-spring4:2.1.2.RELEASE")
+    compile("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:1.2.1")
+    compile("org.apache.knox:gateway-shell:0.6.0") {
+        exclude group: "org.slf4j", module: "slf4j-log4j12"
+        exclude group: "log4j", module: "log4j"
+    }
+}
+
+task wrapper(type: Wrapper) {
+   gradleVersion = '2.0'
+}
+
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../../connection.properties"))
+
+task ('RunLocally') << {
+      
+    println """
+
+    # set the following environment variables
+
+    export gateway=${props.gateway}
+    export username=${props.username}
+    export password=${props.password}
+
+    # Then execute:
+
+    ./gradlew run
+
+    # Then open a browser to:
+
+    http://localhost:8080
+    """
+}
+
+task ('Deploy') << {
+
+    println """
+    # To deploy to bluemix
+
+    APPNAME=<<yourappname>>
+    cf login -u cf_username -p cf_password
+
+    cf set-env $APPNAME gateway ${props.gateway}
+    cf set-env $APPNAME username ${props.username}
+    cf set-env $APPNAME password ${props.password}
+    cf push    $APPNAME -p build/libs/ETL_Service-0.1.0.jar
+    """
+}
+

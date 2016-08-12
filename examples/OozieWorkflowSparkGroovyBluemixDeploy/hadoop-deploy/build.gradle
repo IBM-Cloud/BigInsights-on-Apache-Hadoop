@@ -1,0 +1,57 @@
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+// need to include spark libs in jar
+apply plugin: 'com.github.johnrengelman.shadow'
+
+// set the dependencies for running the groovy script
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.codehaus.groovy:groovy-all:2.0.5'
+        classpath 'org.apache.knox:gateway-shell:0.6.0'
+        // uberjar
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.2'
+    }
+}
+
+// set the dependencies for compiling the groovy script and mapreduce classes
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.0.5'
+    compile 'org.apache.knox:gateway-shell:0.6.0'
+    // compile Spark class
+    compile 'org.apache.spark:spark-core_2.10:1.4.1'
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+// tell gradle the groovy script is in the same folder as the build.gradle file
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['.']
+        }
+    }
+}
+
+// task to run the groovy script
+task('Setup', dependsOn:'jar', type: JavaExec) {
+
+    Properties props = new Properties()
+    props.load(new FileInputStream("$projectDir/../../../connection.properties"))
+
+    environment 'gateway', props.gateway
+    environment 'username', props.username
+    environment 'password', props.password
+
+    main = 'Setup'
+    classpath = sourceSets.main.runtimeClasspath
+}
