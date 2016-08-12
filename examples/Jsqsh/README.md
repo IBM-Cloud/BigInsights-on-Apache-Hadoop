@@ -41,7 +41,7 @@ To setup the jsqsh tool and configuration, open a command prompt window:
 
 ```bash
 $ cd examples/Jsqsh
-$ ./gradlew JsqhSetup
+$ ./gradlew SetupJsqsh
 :CreateConfig UP-TO-DATE
 :CreateKeyStore UP-TO-DATE
 :DownloadJsqsh UP-TO-DATE
