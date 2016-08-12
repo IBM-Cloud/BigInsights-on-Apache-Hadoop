@@ -90,30 +90,36 @@ task('CreateConfig') {
 
 }
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 task('SetupJsqsh') {
     dependsOn DownloadJsqsh, CreateConfig, CreateKeyStore
 
     doLast {
-        println "*******************************************************************"
-        println "Run jsqsh session with:"
-        println ""
-        println "  ./jsqsh-2.2/bin/jsqsh biginsights -C config [other jsqsh options]"
-        println ""
-        println "Run script:" 
-        println ""
-        println "  ./jsqsh-2.2/bin/jsqsh biginsights -C config -e -i simple_select.sql"
-        println "*******************************************************************"
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            println "****************************************************************************"
+            println "Run jsqsh session with:"
+            println ""
+            println "  .\\jsqsh-2.2\\bin\\jsqsh.bat biginsights -C config [other jsqsh options]"
+            println ""
+            println "Run script:" 
+            println ""
+            println "  .\\jsqsh-2.2\\bin\\jsqsh.bat biginsights -C config -e -i simple_select.sql"
+            println "****************************************************************************"
+        } else {
+            println "*********************************************************************"
+            println "Run jsqsh session with:"
+            println ""
+            println "  ./jsqsh-2.2/bin/jsqsh biginsights -C config [other jsqsh options]"
+            println ""
+            println "Run script:" 
+            println ""
+            println "  ./jsqsh-2.2/bin/jsqsh biginsights -C config -e -i simple_select.sql"
+            println "*********************************************************************"
+        }
     }
 }
 
 task('Help') {
     dependsOn SetupJsqsh
-}
-
-task('RunJsqsh', type:Exec) {
-
-    dependsOn DownloadJsqsh, CreateConfig
-
-    commandLine "${projectDir}/jsqsh-2.2/bin/jsqsh","-C","${projectDir}/config/"
-    standardInput = System.in
 }
