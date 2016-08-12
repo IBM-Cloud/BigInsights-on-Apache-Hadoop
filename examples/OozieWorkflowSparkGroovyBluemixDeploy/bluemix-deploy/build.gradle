@@ -69,6 +69,10 @@ task ('Deploy') << {
     println """
     # To deploy to bluemix
 
+    ./gradlew build
+
+    # create a Liberty application in blumemix.  Set APPNAME (below) to the name of the application.
+
     APPNAME=<<yourappname>>
     cf login -u cf_username -p cf_password
 
