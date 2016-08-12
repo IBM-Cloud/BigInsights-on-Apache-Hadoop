@@ -53,6 +53,8 @@ To run the example on Bluemix, open a command prompt window:
       - `./gradlew Deploy` (OS X / *nix)
       - `gradlew.bat Deploy` (Windows)
    - follow the instructions in the output
+
+There is an issue when deploying to Bluemix as can be seen here: http://stackoverflow.com/questions/38921249/rsa-premaster-secret-error-when-using-webhdfs-from-biginsights
  
 ## Decomposition Instructions
 
