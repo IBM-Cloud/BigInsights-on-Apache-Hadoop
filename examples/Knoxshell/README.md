@@ -74,5 +74,5 @@ The examples uses a gradle build file [build.gradle](./build.gradle) when you ru
 - Start knox shell and instanciate the session against your cluster
 - Provide shell prompt for further command to be entered by user. Type `exit` to terminate the session.
 
-All code is well commented and it is suggested that you browse the build.gradle and *.groovy scripts to understand in more detail how they work.
+All code is well commented and it is suggested that you browse the build.gradle to understand in more detail how it works.
 
