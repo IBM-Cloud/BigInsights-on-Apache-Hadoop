@@ -1,6 +1,11 @@
 apply plugin: 'com.github.tkruse.groovysh'
 apply plugin: 'java'
 
+import org.apache.tools.ant.taskdefs.condition.Os
+if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    throw new GradleException("You appear to be running on a Windows machine.  This example does not support Windows.")
+}
+
 // set the dependencies for running the groovy script
 buildscript {
     repositories {
