@@ -100,12 +100,12 @@ task('SetupJsqsh') {
             println "********************************************************************"
             println "Run jsqsh session with:"
             println ""
-            println "  cd jsqsh-2.2\\bin
+            println "  cd jsqsh-2.2\\bin"
             println "  .\\jsqsh.bat biginsights -C ..\\..\\config [other jsqsh options]"
             println ""
             println "Run script:" 
             println ""
-            println "  cd jsqsh-2.2\\bin
+            println "  cd jsqsh-2.2\\bin"
             println "  .\\jsqsh.bat biginsights -C ..\\..\\config -e -i simple_select.sql"
             println "********************************************************************"
         } else {
