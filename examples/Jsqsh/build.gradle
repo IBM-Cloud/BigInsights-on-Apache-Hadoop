@@ -97,15 +97,17 @@ task('SetupJsqsh') {
 
     doLast {
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            println "****************************************************************************"
+            println "********************************************************************"
             println "Run jsqsh session with:"
             println ""
-            println "  .\\jsqsh-2.2\\bin\\jsqsh.bat biginsights -C config [other jsqsh options]"
+            println "  cd jsqsh-2.2\\bin
+            println "  .\\jsqsh.bat biginsights -C ..\\..\\config [other jsqsh options]"
             println ""
             println "Run script:" 
             println ""
-            println "  .\\jsqsh-2.2\\bin\\jsqsh.bat biginsights -C config -e -i simple_select.sql"
-            println "****************************************************************************"
+            println "  cd jsqsh-2.2\\bin
+            println "  .\\jsqsh.bat biginsights -C ..\\..\\config -e -i simple_select.sql"
+            println "********************************************************************"
         } else {
             println "*********************************************************************"
             println "Run jsqsh session with:"
