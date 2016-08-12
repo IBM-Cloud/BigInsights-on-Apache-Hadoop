@@ -50,4 +50,9 @@ The examples uses a gradle build file [build.gradle](./build.gradle) when you ru
 
 All code is well commented and it is suggested that you browse the source code to understand in more detail what they do.
 
+## Help
 
+If you run into the following issue, see the [FAQ](../../FAQ.md)
+```
+> Failed to create MD5 hash for ...
+```
