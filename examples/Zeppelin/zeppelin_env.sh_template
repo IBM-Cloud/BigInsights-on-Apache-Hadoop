@@ -22,6 +22,13 @@
 #            After making the change run `./gradlew UpdateEnv`, followed
 #            by `./gradlew start` or `./gradlew restart`
 
-export ZEPPELIN_PORT=8080
 export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
+
+
+# WARNING: Zeppelin will listen for connections on this port and will not
+#          authenticate users.  Ensure the Zeppelin port is protected by a 
+#          firewall so that it is only available through a ssh tunnel to 
+#          the cluster.
+
+export ZEPPELIN_PORT=8080
