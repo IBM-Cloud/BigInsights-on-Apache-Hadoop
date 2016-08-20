@@ -11,7 +11,7 @@ The Installation of Zeppelin will result in Zeppelin server listening for connec
 
 **WARNING:** 
 - Any user with ssh access will be able to access a Zeppelin instance running on another user's account and execute code as the user running Zeppelin.
-- If you are installing Zeppelin on an on-premise BigInsights cluster ensure you firewall the port exposed by Zeppelin.
+- Ensure The port listened on by Zeppelin is firewalled so that Zeppelin can only be accessed via a ssh tunnel. Zeppelin is not configured to authenticate users so if the port Zeppelin listens on is not firewalled anyone will be able to access your cluster.
 
 
 ## User experience
