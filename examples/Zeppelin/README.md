@@ -12,7 +12,7 @@ The Installation of Zeppelin will result in Zeppelin server listening for connec
 ![warning image](./image.png) **WARNING:** 
 
 - Any user with ssh access will be able to access a Zeppelin instance running on another user's account and execute code as the user running Zeppelin.
-- Ensure The port listened on by Zeppelin is firewalled so that Zeppelin can only be accessed via a ssh tunnel. Zeppelin is not configured to authenticate users so if the port Zeppelin listens on is not firewalled anyone will be able to access your cluster.
+- Ensure that the port Zeppelin listens on (8080 by default) is firewalled so that Zeppelin can only be accessed via ssh. Zeppelin is not configured to authenticate users so if the port Zeppelin listens on is not firewalled anyone will be able to access your cluster.
 
 
 ## User experience
