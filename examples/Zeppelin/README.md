@@ -9,7 +9,8 @@ This example installs, configures and runs [Zeppelin](https://zeppelin.apache.or
 
 The Installation of Zeppelin will result in Zeppelin server listening for connections on all interfaces on port 8080 (the port can be changed as described [here](#install-zeppelin)) on the cluster mastermanager.  BigInsights for Apache Hadoop on IBM Bluemix is hidden by a firewall and Zeppelin can only be accessed on client machines using a SSH tunnel ([more info](#decomposition-instructions)). The SSH tunnel is setup for you when you execute the [Run](#run-zeppelin) target.  The SSH tunnel ensures only users can only access Zeppelin if they have the credentials to log in via SSH.
 
-**WARNING:** 
+![warning image](./image.png) **WARNING:** 
+
 - Any user with ssh access will be able to access a Zeppelin instance running on another user's account and execute code as the user running Zeppelin.
 - Ensure The port listened on by Zeppelin is firewalled so that Zeppelin can only be accessed via a ssh tunnel. Zeppelin is not configured to authenticate users so if the port Zeppelin listens on is not firewalled anyone will be able to access your cluster.
 
