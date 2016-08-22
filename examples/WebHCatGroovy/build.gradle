@@ -47,16 +47,17 @@ sourceSets {
     }
 }
 
-// the jar statement is required to package the MapReduce class
-// this is only required for the WebHCatMapReduce Example
-    
-jar {
-    archiveName = 'hadoop-examples.jar'
-    destinationDir = file('samples')
-}
 
-// task to run the groovy script
-task('MapReduce', dependsOn:'jar', type: JavaExec) {
+// task to run the groovy script, note that we depend on the
+// MapReduce java classes being compiled
+task('MapReduce', dependsOn:'compileJava', type: JavaExec) {
+
+    // package up the MapReduce classes
+    jar {
+        includes = [ 'org/**' ]
+        archiveName = 'hadoop-examples.jar'
+        destinationDir = file('samples')
+    }
 
     Properties props = new Properties()
     props.load(new FileInputStream("$projectDir/../../connection.properties"))
