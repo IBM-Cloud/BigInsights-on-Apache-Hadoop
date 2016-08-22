@@ -87,7 +87,9 @@ Total time: 2.297 secs
 ```
 The output above shows the output on *my cluster*.  You may have different files and directories on *your cluster* so your output may be different.
  
-**NOTE:** Replace `Ls` with `Mkdir` to run the example to create a directory in HDFS, or `Put` to upload a file to HDFS.
+**NOTE:** 
+- Replace `Ls` with `Mkdir` to run the example to create a directory in HDFS, or `Put` to upload a file to HDFS.
+- See the WebHDFS documentation for a `Get` example - [link](http://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#Open_and_Read_a_File)
 
 ## Decomposition Instructions
 
