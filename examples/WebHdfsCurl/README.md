@@ -89,7 +89,7 @@ The output above shows the output on *my cluster*.  You may have different files
  
 **NOTE:** 
 - Replace `Ls` with `Mkdir` to run the example to create a directory in HDFS, or `Put` to upload a file to HDFS.
-- See the WebHDFS documentation for a `Get` example - [link](http://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#Open_and_Read_a_File)
+- See the [WebHDFS documentation](http://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/WebHDFS.html#Open_and_Read_a_File) for a `Get` example 
 
 ## Decomposition Instructions
 
