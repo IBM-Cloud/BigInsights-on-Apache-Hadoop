@@ -39,7 +39,7 @@ EOF
 if [[ ! -e ${ZEPPELIN}.tgz || "$(md5sum -c --status ${ZEPPELIN}.tgz.md5)" != 0 ]]
 then
     echo "Couldn't find ${ZEPPELIN}.tgz so downloading now ..."
-    wget -q http://www.mirrorservice.org/sites/ftp.apache.org/zeppelin/zeppelin-0.6.0/${ZEPPELIN}.tgz
+    wget -q http://archive.apache.org/dist/zeppelin/zeppelin-0.6.0/${ZEPPELIN}.tgz
 fi
 
 tar xzf ${ZEPPELIN}.tgz
