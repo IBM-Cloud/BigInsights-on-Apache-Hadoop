@@ -83,6 +83,23 @@ task('Pig', type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+task('Sqoop', type: JavaExec) {
+
+    Properties props = new Properties()
+    props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+    environment 'gateway', props.gateway
+    environment 'username', props.username
+    environment 'password', props.password
+
+    environment 'dashdb_url', props.dashdb_sqoop_url
+    environment 'dashdb_username', props.dashdb_sqoop_username
+    environment 'dashdb_password', props.dashdb_sqoop_password
+
+    main = 'Sqoop'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 task('Hive', type: JavaExec) {
 
     Properties props = new Properties()
