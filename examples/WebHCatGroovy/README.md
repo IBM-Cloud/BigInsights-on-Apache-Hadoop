@@ -28,6 +28,13 @@ Developers will gain the most from these examples if they are:
 
 You have met the [pre-requisites](../../README.md#pre-requisites) and have followed the [setup instructions](../../README.md#setup-instructions) in the top level [README](../../README.md)
 
+For Sqoop example, make sure to specify following in your connection.properties file:
+```
+dashdb_sqoop_url:jdbc:db2://changeme:changeme/BLUDB:sslConnection=true;
+dashdb_sqoop_username:changeme
+dashdb_sqoop_password:changeme
+```
+
 ## Run the example
 
 This example consists of:
@@ -35,6 +42,7 @@ This example consists of:
 - [Hive.groovy](./Hive.groovy) - Groovy script to submit the Hive job via WebHCat
 - [MapReduce.groovy](./MapReduce.groovy) - Groovy script to submit the Map/Reduce job via WebHCat
 - [Pig.groovy](./Pig.groovy) - Groovy script to submit the Pig job via WebHCat
+- [Sqoop.groovy](./Sqoop.groovy) - Groovy script to submit the Sqoop job via WebHCat
 - [build.gradle](./build.gradle) - Gradle script to compile and package the Map/Reduce code and execute each groovy script 
 
 To run the examples, open a command prompt window:
@@ -160,6 +168,59 @@ The output above shows:
 - the steps performed by gradle (command names are prefixed by ':' such as :compileJava) 
 - the steps performed by the Pig.groovy script prefixed with [Pig.groovy]
 - the Pig Job output from content of stdout
+
+To Run Sqoop example, use `./gradlew Sqoop`
+```
+$ cd examples/WebHCatGroovy
+$ ./gradlew Sqoop
+:compileJava UP-TO-DATE
+:compileGroovy
+Note: /Users/pierreregazzoni/BigInsights-on-Apache-Hadoop/examples/WebHCatGroovy/src/main/java/org/apache/hadoop/examples/WordCount.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+:processResources UP-TO-DATE
+:classes
+:Sqoop
+[Sqoop.groovy] Delete /user/biadmin/sqoop: 200
+[Sqoop.groovy] Mkdir /user/biadmin/sqoop: 200
+[Sqoop.groovy] Submitted job: job_1471997327942_0112
+[Sqoop.groovy] Polling up to 60s for job completion...
+..............................................
+[Sqoop.groovy] Job status: true
+[exit, stderr, stdout]
+
+[Sqoop.groovy] Content of stderr:
+log4j:WARN custom level class [Relative to Yarn Log Dir Prefix] not found.
+16/08/25 13:18:08 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6_IBM_27
+
+...
+
+	File Output Format Counters 
+		Bytes Written=87
+16/08/25 13:18:34 INFO mapreduce.ImportJobBase: Transferred 87 bytes in 22.8155 seconds (3.8132 bytes/sec)
+16/08/25 13:18:34 INFO mapreduce.ImportJobBase: Retrieved 3 records.
+
+[_SUCCESS, part-m-00000]
+
+[Sqoop.groovy] Content of part-m-00000
+b,N/A (less than 5 years old)
+1,Yes, speaks another language
+2,No, speaks only English
+
+
+BUILD SUCCESSFUL
+
+Total time: 59.665 secs
+
+```
+
+The output above shows:
+
+- the steps performed by gradle (command names are prefixed by ':' such as :compileJava) 
+- the steps performed by the Pig.groovy script prefixed with [Sqoop.groovy]
+- the Sqoop Job output from content of stderr
+- the content of the table that was 'sqooped' from dashdb to HDFS
+
+**NOTE**: The Sqoop example use a local patch for [JIRA KNOX-743](https://issues.apache.org/jira/browse/KNOX-743)
  
 ## Decomposition Instructions
 
