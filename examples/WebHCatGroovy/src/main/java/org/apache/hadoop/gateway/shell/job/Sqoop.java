@@ -36,10 +36,6 @@ public class Sqoop {
 
   static class Request extends AbstractRequest<Response> {
 
-    private String command;
-    private String libdir;
-    private String files;
-    private String optionsFile;
     private String statusDir;
     List<NameValuePair> params = new ArrayList<NameValuePair>();
 
