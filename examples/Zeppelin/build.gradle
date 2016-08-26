@@ -242,6 +242,11 @@ task Run << {
 
     def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
 
+    if (!zeppelin_env.exists()) {
+        throw new GradleException("** Couldn't find the file 'zeppelin_env.sh'.\n" +
+                                  "** Consult the README.md file for more information")
+    }
+
     def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
     def zeppelin_port = matcher[0][1]
 
