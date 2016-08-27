@@ -13,6 +13,7 @@ The Installation of Zeppelin will result in Zeppelin server listening for connec
 
 - Any user with ssh access will be able to access a Zeppelin instance running on another user's account and execute code as the user running Zeppelin.
 - Ensure that the port Zeppelin listens on (8080 by default) is firewalled so that Zeppelin can only be accessed via ssh. Zeppelin is not configured to authenticate users so if the port Zeppelin listens on is not firewalled, anyone will be able to access your cluster.
+- As with all of the other examples, this example is community supported.  We will endeavour to make sure the Zeppelin example works with future versions of BigInsights, however this cannot be guaranteed.
 
 
 ## User experience
