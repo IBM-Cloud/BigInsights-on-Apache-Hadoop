@@ -1,7 +1,7 @@
 
 ## Example projects for 'BigInsights for Apache Hadoop' on IBM Bluemix
 
-This repository contains example projects for [BigInsights](https://console.ng.bluemix.net/catalog/services/biginsights-for-apache-hadoop). Following the steps below on your client machine, it should take you less than 5 minutes to run any of the example projects against a BigInsights cluster. The projects are tested on [BigInsights on IBM Bluemix](https://console.ng.bluemix.net/catalog/services/biginsights-for-apache-hadoop) but they should also work for BigInsights on-premise.
+This repository contains example projects for [BigInsights](https://console.ng.bluemix.net/catalog/services/biginsights-for-apache-hadoop). Following the steps below on your client machine, it should take you less than 5 minutes to run any of the example projects against a BigInsights cluster. The projects are tested on [BigInsights on IBM Bluemix](https://console.ng.bluemix.net/catalog/services/biginsights-for-apache-hadoop) but they should also work for BigInsights on-premise.  Note that all of the examples are community supported.
 
 ![Overview Image](./overview.png)
 
