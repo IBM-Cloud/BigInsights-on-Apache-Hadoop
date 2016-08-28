@@ -62,7 +62,7 @@ task Uninstall << {
                 execute "kinit -k -t ${props.username}.keytab ${props.username}@IBM.COM"
             } 
             catch (Exception e) {
-                println "kinit not found - maybe this is a Basic cluster?"
+                println "kinit not found so not renewing kerberos ticket - maybe this is a Basic cluster?"
             }
 
             put from: "${projectDir}/zeppelin_uninstall.sh", 
@@ -178,7 +178,7 @@ task Install (dependsOn: CreateTruststore) << {
                 execute "kinit -k -t ${props.username}.keytab ${props.username}@IBM.COM"
             } 
             catch (Exception e) {
-                println "kinit not found - maybe this is a Basic cluster?"
+                println "kinit not found so not renewing kerberos ticket - maybe this is a Basic cluster?"
             }
 
             put from: "${projectDir}/truststore.jks", 
