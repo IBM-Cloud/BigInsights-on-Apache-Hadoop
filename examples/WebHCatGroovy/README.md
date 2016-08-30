@@ -1,3 +1,5 @@
+**Important** this example does not work on Basic clusters.  A defect has been raised with the Bluemix on Cloud IBM engineering team.
+
 ## Overview
 
 This example shows how to use WebHCat to submit Hive, MapReduce and Pig jobs to a BigInsights cluster and wait for the job response.  An example use cases for programmatically running Map/Reduce jobs on the BigInsights cluster is a client application that needs to process data in BigInsights and send the results of processing to a third party application.  Here the client application could be an [ETL](https://en.wikipedia.org/wiki/Extract,_transform,_load) tool job, a [Microservice](https://en.wikipedia.org/wiki/Microservices), or some other custom application. 
