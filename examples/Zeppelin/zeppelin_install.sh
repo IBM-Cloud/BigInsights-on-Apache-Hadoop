@@ -44,6 +44,8 @@ fi
 
 tar xzf ${ZEPPELIN}.tgz
 
+wget -q https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.3/cloudant-spark-v1.6.3-125.jar 
+
 # copy the zeppelin environment variable script to the conf folder
 cp ./zeppelin_env.sh ./${ZEPPELIN}/conf/zeppelin-env.sh
 
