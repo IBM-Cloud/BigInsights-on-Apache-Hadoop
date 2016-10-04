@@ -24,7 +24,7 @@
 
 export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
-export SPARK_SUBMIT_OPTIONS="--jars ${HOME}/cloudant-spark-v1.6.3-125.jar --packages com.databricks:spark-csv_2.10:1.2.0"
+export SPARK_SUBMIT_OPTIONS="--packages cloudant-labs:spark-cloudant:1.6.4-s_2.10 --packages com.databricks:spark-csv_2.10:1.2.0"
 
 # WARNING: Zeppelin will listen for connections on this port and will not
 #          authenticate users.  Ensure the Zeppelin port is protected by a 
