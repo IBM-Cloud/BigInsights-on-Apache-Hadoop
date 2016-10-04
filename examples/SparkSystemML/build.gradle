@@ -1,0 +1,37 @@
+plugins {
+    // ssh plugin documentation: https://gradle-ssh-plugin.github.io/docs/
+    id 'org.hidetake.ssh' version '1.5.0'
+}
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+// get the cluster connection details
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+
+task LinearRegression << {
+
+    ssh.run {
+        // remotes.bicluster is defined in shared/common-helpers.gradle
+        session(remotes.bicluster) {
+            try {
+                // initialise kerberos
+                execute "kinit -k -t ${props.username}.keytab ${props.username}@IBM.COM"
+            }
+            catch (Exception e) {
+                println "kinit not found so not renewing kerberos ticket - maybe this is a Basic cluster?"
+            }
+
+            put from: "${projectDir}/LinearRegression.sh",
+                    into: "./LinearRegression.sh"
+
+            // dos2unix incase users have edited on windows
+            execute "sed -i 's/\r//' ./LinearRegression.sh"
+
+            execute "bash ./LinearRegression.sh"
+        }
+    }
+}
+
