@@ -21,7 +21,7 @@ password:changeme
 # These properties are required
 
 # the ambari host name is usually the same as the gateway host name
-ambariUrl:https://changeme:9443/api
+ambariUrl:https://changeme:9443/
 
 # the ambari username and password are usually the same as those for the gateway
 # E.g. ambariUsername:biadmin
