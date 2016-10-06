@@ -161,9 +161,14 @@ def uploadNotebooks = { port ->
 task Install (dependsOn: CreateTruststore) << {
 
     def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
+    def shiro_ini = file("${projectDir}/shiro.ini")
 
     if (!zeppelin_env.exists()) {
         zeppelin_env.text = file("${projectDir}/zeppelin_env.sh_template").text
+    }
+
+    if (!shiro_ini.exists()) {
+        shiro_ini.text = file("${projectDir}/shiro.ini_template").text
     }
 
     def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
@@ -190,9 +195,13 @@ task Install (dependsOn: CreateTruststore) << {
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
 
+            put from: "${projectDir}/shiro.ini", 
+                into: "./shiro.ini"
+
             // dos2unix incase users have edited files on windows
             execute "sed -i 's/\r//' ./zeppelin_install.sh"
             execute "sed -i 's/\r//' ./zeppelin_env.sh"
+            execute "sed -i 's/\r//' ./shiro.ini"
 
             put from: "${projectDir}/../../downloads/db2jcc.jar",
                 into: "/tmp/db2jcc.jar"
@@ -239,6 +248,56 @@ task Install (dependsOn: CreateTruststore) << {
 
 
 task Run << {
+
+    def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
+
+    if (!zeppelin_env.exists()) {
+        throw new GradleException("** Couldn't find the file 'zeppelin_env.sh'.\n" +
+                                  "** Consult the README.md file for more information")
+    }
+
+    def matcher = ( zeppelin_env.text =~ /export\s*ZEPPELIN_PORT=([0-9]+)\s*/ )
+    def zeppelin_port = matcher[0][1]
+
+    ssh.run {
+        session(remotes.bicluster) {
+            
+            // make sure zeppelin is installed
+            try {
+                execute "[[ -d ./${ZEPPELIN} ]]"
+            } 
+            catch (Exception e) {
+                throw new GradleException(
+                    "Couldn't find the Zeppelin installation.  Try running './gradlew Install'."
+                    )
+            }
+            // make sure zeppelin is running
+            execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh status || ./${ZEPPELIN}/bin/zeppelin-daemon.sh start"
+
+          
+            def output = """\n\n
+                            |- Zeppelin is running.
+                            |- Users can connect by creating a ssh tunnel, e.g.
+                            |
+                            |\$ ssh -L12345:localhost:${zeppelin_port} ssh_username@${remotes.bicluster.host}
+                            |
+                            |   Where '12345' is a port on the local machine 
+                            |         'ssh_username' is the ssh user account name for the user
+                            |
+                            |- The above command will forward network traffic from their local machine on port 12345
+                            |  to the Zeppelin port (${zeppelin_port}) on the BigInsights cluster.
+                            |- They will then be able to access Zeppelin by opening a browser on their local machine
+                            |  and navigating to the URL: http://localhost:12345 (yes localhost!).
+                            |- If port 12345 is not available locally users can use a different port.
+                            |- Windows users can setup ssh forwarding with putty.  Search the internet for an example
+                            |  e.g. https://www.skyverge.com/blog/how-to-set-up-an-ssh-tunnel-with-putty/"""
+
+            println output.stripMargin() 
+        }
+    }
+}
+
+task Connect << {
 
     def zeppelin_env = file("${projectDir}/zeppelin_env.sh")
 
@@ -357,8 +416,12 @@ task UpdateEnv << {
             put from: "${projectDir}/zeppelin_env.sh", 
                 into: "./${ZEPPELIN}/conf/zeppelin-env.sh"
 
+            put from: "${projectDir}/shiro.ini", 
+                into: "./${ZEPPELIN}/conf/shiro.ini"
+
             println "\n\n"
             println ">> zeppelin_env.sh has been copied to the cluster."
+            println ">> shiro.ini has been copied to the cluster."
             println ">> Run `./gradlew restart` to apply your changes."
         }
     }
