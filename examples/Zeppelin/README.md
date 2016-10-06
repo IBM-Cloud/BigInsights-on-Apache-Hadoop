@@ -242,4 +242,3 @@ Therefore, when you connect to this local URL you are really connecting to the z
   - sh
   - hive
   - bigsql (if the cluster has bigsql installed)
-- each user needs to install zeppelin into their own account, by setting the ZEPPELIN_PORT to an available port on the cluster.
