@@ -419,6 +419,9 @@ task UpdateEnv << {
             put from: "${projectDir}/shiro.ini", 
                 into: "./${ZEPPELIN}/conf/shiro.ini"
 
+            execute "sed -i 's/\r//' ./zeppelin_env.sh"
+            execute "sed -i 's/\r//' ./shiro.ini"
+
             println "\n\n"
             println ">> zeppelin_env.sh has been copied to the cluster."
             println ">> shiro.ini has been copied to the cluster."
@@ -426,4 +429,3 @@ task UpdateEnv << {
         }
     }
 }
-
