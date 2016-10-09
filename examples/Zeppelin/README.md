@@ -147,6 +147,8 @@ Users would connect to Zeppelin by setting up ssh port forwarding as described i
 
 ### Connect to Zeppelin
 
+Note: when you are running 'Connect', you will not be able to run gradle in another terminal because gradle locks the folder that it is running in.
+
 After installing and running Zeppelin, you can connect to Zeppelin as a test by performing `./gradlew Connect`:
 
 ```bash
