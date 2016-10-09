@@ -71,7 +71,21 @@ pierre = hispassword
 
 Users will need to enter this password to login to the Zeppelin user interface.
 
-Finally, run `./gradlew UpdateEnv` for the changes to take effect and then restart Zeppelin daemon with `./gradlew -q restart`
+Next, run `./gradlew UpdateEnv` to apply the changes:
+
+```bash
+$ ./gradlew UpdateEnv
+:UpdateEnv
+Strict host key checking is off. It may be vulnerable to man-in-the-middle attacks.
+
+>> zeppelin_env.sh has been copied to the cluster.
+>> shiro.ini has been copied to the cluster.
+>> Run `./gradlew restart` to apply your changes.
+
+BUILD SUCCESSFUL
+```
+
+Finally, restart Zeppelin daemon with `./gradlew -q restart` for the changes to take effect:
 
 ```bash
 $ ./gradlew -q restart
