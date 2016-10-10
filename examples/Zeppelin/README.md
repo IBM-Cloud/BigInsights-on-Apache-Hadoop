@@ -212,6 +212,14 @@ bicluster#1|Zeppelin stop                                  [  OK  ]
 bicluster#1|Zeppelin start                                 [  OK  ]
 ```
 
+### Debugging failed installations
+
+If you are unable to connect to Zeppelin after installing and setting up users, you may inspect the log files by ssh'ing into the cluster and inspecting the files in the ./logs directory:
+
+```bash
+./zeppelin-0.6.0-bin-all/logs
+```
+
 ### Test Zeppelin with Pyspark
 
 First run Zeppelin, Then click on the Notebook dropdown menu from the main toolbar and click on the Pyspark Test notebook:
