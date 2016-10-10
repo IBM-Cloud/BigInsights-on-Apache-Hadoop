@@ -195,13 +195,9 @@ task Install (dependsOn: CreateTruststore) << {
             put from: "${projectDir}/zeppelin_install.sh", 
                 into: "./zeppelin_install.sh"
 
-            put from: "${projectDir}/shiro.ini", 
-                into: "./shiro.ini"
-
             // dos2unix incase users have edited files on windows
             execute "sed -i 's/\r//' ./zeppelin_install.sh"
             execute "sed -i 's/\r//' ./zeppelin_env.sh"
-            execute "sed -i 's/\r//' ./shiro.ini"
 
             put from: "${projectDir}/../../downloads/db2jcc.jar",
                 into: "/tmp/db2jcc.jar"
@@ -239,6 +235,13 @@ task Install (dependsOn: CreateTruststore) << {
             configureInterpreters(local_port)
 
             uploadNotebooks(local_port)
+            
+            // FIXME: we have a window where Zeppelin is running without requiring users to authenticate
+            
+            put from: "${projectDir}/shiro.ini", 
+                into: "./${ZEPPELIN}/conf/shiro.ini"
+
+            execute "sed -i 's/\r//' ~/${ZEPPELIN}/conf/shiro.ini"
 
             // restart zeppelin
             execute "./${ZEPPELIN}/bin/zeppelin-daemon.sh restart"
