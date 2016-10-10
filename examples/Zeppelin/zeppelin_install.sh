@@ -47,6 +47,9 @@ tar xzf ${ZEPPELIN}.tgz
 # copy the zeppelin environment variable script to the conf folder
 cp ./zeppelin_env.sh ./${ZEPPELIN}/conf/zeppelin-env.sh
 
+# copy the shiro ini file to the conf folder
+cp ./shiro.ini ./${ZEPPELIN}/conf/shiro.ini
+
 # load the zeppelin envivonment variables
 source ./${ZEPPELIN}/conf/zeppelin-env.sh
 
