@@ -5,6 +5,10 @@ This example installs, configures and runs [Zeppelin](https://zeppelin.apache.or
 - to provide data scientists with notebook functionality
 - to provide example code in the form of notebooks for services such as hbase
 
+Recorded video example:
+
+[![Image of Youtube Video](./docs/title.png)](https://www.youtube.com/watch?v=R4vkhGoTVgM)
+
 
 ### Security notice
 
