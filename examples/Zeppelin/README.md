@@ -151,6 +151,8 @@ $ ssh -L12345:localhost:8080 ssh_username@bi-hadoop-prod-4146.bi.services.us-sou
 
 Users would connect to Zeppelin by setting up ssh port forwarding as described in the output from the `./gradlew Run` command.
 
+**NOTE:** While you are connected as zeppelin user e.g. chris, the zeppelin server will execute command under the zeppelin user defined in connection.properties file at the time of installation. See [Security notice](#Security-notice) above.
+
 ### Connect to Zeppelin
 
 Note: 
