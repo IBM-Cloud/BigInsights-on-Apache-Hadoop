@@ -33,6 +33,8 @@ Users will gain the most from these examples if they are:
 
 ### Install Zeppelin
 
+This section describes how to install Zeppelin on your cluster.  Zeppelin will get installed onto the mastermanager host of the cluster under the user account defined in the `username` field of the connection.properties file.
+
 First copy the file `zeppelin_env.sh_template` to `zeppelin_env.sh`.  Ensure that the value for `ZEPPELIN_PORT` is set a port that is available on the cluster.  
 
 Then copy the file `shiro.ini_template` to `shiro.ini`.
