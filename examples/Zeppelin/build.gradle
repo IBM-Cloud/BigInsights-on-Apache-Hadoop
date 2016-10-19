@@ -123,7 +123,7 @@ def configureInterpreters = { port ->
 
           if (bigsqlHost != null) {
               // configure bigsql jdbc interpreter
-              interpreter.properties['bigsql.url'] = 'jdbc:db2://' + bigsqlHost + ':51000/bigsql:sslConnection\u003dtrue;sslTrustStoreLocation\u003d/home/biadmin/zeppelin_truststore.jks;Password\u003dmypassword;'
+              interpreter.properties['bigsql.url'] = 'jdbc:db2://' + bigsqlHost + ':51000/bigsql:sslConnection\u003dtrue;sslTrustStoreLocation\u003d/home/' + props.username + '/zeppelin_truststore.jks;Password\u003dmypassword;'
               interpreter.properties['bigsql.user'] = props.username
               interpreter.properties['bigsql.password'] = props.password
               interpreter.properties['bigsql.driver'] = 'com.ibm.db2.jcc.DB2Driver'
