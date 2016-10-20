@@ -63,7 +63,7 @@ println "[Pig.groovy] Submitted job: " + jobId
 println "[Pig.groovy] Polling up to 60s for job completion..."
 done = false
 count = 0
-while( !done && count++ < 60 ) {
+while( !done && count++ < 120 ) {
   sleep( 1000 )
   json = Job.queryStatus(session).jobId(jobId).now().string
   done = JsonPath.read( json, "\$.status.jobComplete" )
