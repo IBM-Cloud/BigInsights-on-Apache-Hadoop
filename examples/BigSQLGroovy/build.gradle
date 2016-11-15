@@ -52,9 +52,10 @@ clean {
     delete './truststore.jks'
 }
 
-task ('CreateTrustStore', type:Exec) {
+task ('CreateTrustStore') {
 
     // this build step will fail if we try to import the certificate into an existing truststore
+    println ">> Remove key store"
     delete './truststore.jks'
 
     // ensure the ssl certificate exists
@@ -63,6 +64,7 @@ task ('CreateTrustStore', type:Exec) {
     }
 
     // import the BigInsights manager certificate
+    println ">> Create key store"
     ant.exec(executable: "${getKeytoolPath()}", dir:'./') {
         arg(line: '-import -trustcacerts -alias biginsights -file ../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt')
     }

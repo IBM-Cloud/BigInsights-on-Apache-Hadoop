@@ -24,6 +24,7 @@ url = "jdbc:db2://${env.hostname}:51000/bigsql:sslConnection=true;sslTrustStoreL
 
 db = [ url:url, user:env.username, password:env.password, driver:'com.ibm.db2.jcc.DB2Driver']
 
+println "[Federation.groovy] Connecting to Big SQL"
 sql = Sql.newInstance(db.url, db.user, db.password, db.driver)
 
 dash_user = env.dashUser
@@ -32,34 +33,34 @@ dash_host = env.dashHost
 dash_port = env.dashPort
 
 // Create wrapper
-println "Create wrapper"
-sql.execute("DROP WRAPPER drda")
+println "[Federation.groovy] Create wrapper"
+//sql.execute("DROP WRAPPER drda")
 sql.execute("CREATE WRAPPER drda")
 
 // Create server mapping
-println "Create server mapping"
+println "[Federation.groovy] Create server mapping"
 sql.execute """
-   CREATE SERVER DASHDB TYPE DB2/UDB VERSION 10.7 WRAPPER DRDA
+   CREATE SERVER DASHDB TYPE DB2/UDB VERSION 11.1
+   WRAPPER DRDA
    AUTHORIZATION "${dash_user}" PASSWORD "${dash_password}"
-   OPTIONS (DBNAME 'BLUDB', COLLATING_SEQUENCE 'N')
+   OPTIONS (HOST '${dash_host}', PORT '${dash_port}', DBNAME 'BLUDB', PASSWORD 'Y')
 """.toString()
 
 // Create user mapping
-println "Create user mapping"
+println "[Federation.groovy] Create user mapping"
 sql.execute """
    CREATE USER MAPPING FOR ${db.user} SERVER DASHDB
    OPTIONS (REMOTE_AUTHID '${dash_user}', REMOTE_PASSWORD '${dash_password}')
 """.toString()
 
 // Create nickname
-println "Create nickname"
+println "[Federation.groovy] Create nickname"
 sql.execute("CREATE NICKNAME LANGUAGE FOR DASHDB.SAMPLES.LANGUAGE")
 
 // Select from table
 def select_statment = "select language_code, language_desc from language"
-println "Select from table: $select_statment"
+println "[Federation.groovy] Select from table: $select_statment"
 sql.eachRow(select_statment.toString()) { row ->
   println "$row.language_code : $row.language_desc"
 }
 
-println "\n>> Federation test was successful."
