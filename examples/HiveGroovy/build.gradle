@@ -55,10 +55,19 @@ task('Example', type: JavaExec) {
         arg(line: '-import -trustcacerts -alias biginsights -file ../../certificate -keystore ./truststore.jks -storepass mypassword -noprompt')
     }
 
+    def hive_hostname
+
+    // get hive server hostname
+    try {
+        hive_hostname = getMasters(props)['HIVE_SERVER'][0]
+    } catch (Exception e) {
+        throw new GradleException('Could not find a HIVE host for this cluster.')
+    }
+
     // pass environment variables to the groovy script
     // hostname is set by identifying HIVE_SERVER host
     // if hive server 2 is running on default port, change Example.groovy jdbc connection
-    environment 'hostname', getMasters(props)['HIVE_SERVER'][0]
+    environment 'hostname', hive_hostname
     environment 'username', props.username
     environment 'password', props.password
 
