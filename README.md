@@ -7,6 +7,11 @@ This repository contains example projects for [BigInsights](https://console.ng.b
 
 The core idea is that you can run an example project to see it working against your BigInsights cluster. You can then copy the project and adapt it to add your own custom logic.  Think of the example projects as working blueprints.
 
+**IMPORTANT:** Please vote for the following [Data Science Experience](http://datascience.ibm.com/) functionality that will replace this Zeppelin installation with an officially supported integration of notebooks with BigInsights:
+
+- [Integrate BigInsights with DSX](https://datascix.uservoice.com/forums/387207-general/suggestions/16274593-integrate-with-biginsights)
+- [Include Zeppelin notebooks on DSX](https://datascix.uservoice.com/forums/387207-general/suggestions/15192399-add-zeppelin-notebooks)
+
 *********************************************************************
 
 ### Pre-requisites
