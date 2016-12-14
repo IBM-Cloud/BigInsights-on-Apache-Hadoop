@@ -84,3 +84,20 @@ ssh -N -L $CLIENT_PORT:localhost:$JUPYTER_PORT $BI_USER@$BI_HOST
 Leave this session running ^^
 
 Now open a web browser on your client machine to http://localhost:8989 (this port must be the same as the CLIENT_PORT)
+
+Try running a pyspark job:
+
+```python
+NUM_SAMPLES=1000000000
+from random import random
+
+def sample(p):
+    x, y = random(), random()
+    return 1 if x*x + y*y < 1 else 0
+
+count = sc.parallelize(xrange(0, NUM_SAMPLES)).map(sample) \
+             .reduce(lambda a, b: a + b)
+print "Pi is roughly %f" % (4.0 * count / NUM_SAMPLES)
+```
+
+While it is running, execute `yarn application -list` on the cluster to verify the spark job is running on yarn.
