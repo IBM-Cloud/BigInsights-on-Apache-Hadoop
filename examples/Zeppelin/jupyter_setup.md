@@ -1,0 +1,81 @@
+# Overview
+
+This script installs and configures toree on a BigInsights on cloud 4.2 Enterprise cluster.
+
+Note that these instructions do NOT work for Basic clusters.
+
+# Install Anaconda, Toree and Jupyter
+
+Ssh into the mastermanager node, then run:
+
+```bash
+export BI_USER=snowch
+export BI_PASS=changeme
+export BI_HOST=bi-hadoop-prod-4118.bi.services.us-south.bluemix.net
+```
+
+Change the above values for your environment, then run
+
+```bash
+CLUSTER_NAME=$(curl -s -k -u $BI_USER:$BI_PASS  -X GET https://${BI_HOST}:9443/api/v1/clusters | python -c 'import sys, json; print(json.load(sys.stdin)["items"][0]["Clusters"]["cluster_name"]);')
+echo Cluster Name: $CLUSTER_NAME
+
+CLUSTER_HOSTS=$(curl -s -k -u $BI_USER:$BI_PASS  -X GET https://${BI_HOST}:9443/api/v1/clusters/${CLUSTER_NAME}/hosts | python -c 'import sys, json; items = json.load(sys.stdin)["items"]; hosts = [ item["Hosts"]["host_name"] for item in items ]; print(" ".join(hosts));')
+echo Cluster Hosts: $CLUSTER_HOSTS
+
+# Install anaconda and toree on the mastermanager node
+wget -c https://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh
+if [[ ! -d anaconda2 ]]
+then
+   bash Anaconda2-4.1.1-Linux-x86_64.sh -b
+   ./anaconda2/bin/pip install toree
+fi
+
+# Install toree
+./anaconda2/bin/jupyter toree install --spark_home=/usr/iop/current/spark-client/ --user --interpreters Scala,PySpark,SparkR  --spark_opts="--master yarn" --python_exec=${HOME}/anaconda2/bin/python2.7
+
+# Install anaconda on all of the cluster nodes
+for CLUSTER_HOST in ${CLUSTER_HOSTS}; 
+do 
+   if [[ "$CLUSTER_HOST" != "$BI_HOST" ]];
+   then
+      ssh $BI_USER@$CLUSTER_HOST \
+          wget -c https://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh && \
+          [[ ! -d anaconda2 ]] && bash Anaconda2-4.1.1-Linux-x86_64.sh -b
+   fi
+done
+
+echo 'Finished installing'
+```
+
+# Run Jupyter
+
+Everytime you want to run jupter, open a ssh session to the master manager node and run the following (enter password when prompted):
+
+```bash
+PYSPARK_PYTHON=${HOME}/anaconda2/bin/python2.7 ${HOME}/anaconda2/bin/jupyter notebook  --port=8888 --port-retries=0 --no-browser
+```
+
+Leave this terminal ^^ session running.  Back on your client, run the following (change for your environment):
+
+```bash
+export BI_USER=snowch
+export BI_PASS=changeme
+export BI_HOST=bi-hadoop-prod-4118.bi.services.us-south.bluemix.net
+
+# E.g. The Jupyter Notebook is running at: http://localhost:8888/
+export JUPYTER_PORT=8888
+
+# set this to a free port on your client machine
+export CLIENT_PORT=8989
+```
+
+Now run the following on your client machine (enter password when prompted):
+
+```bash
+ssh -N -L $CLIENT_PORT:localhost:$JUPYTER_PORT $BI_USER@$BI_HOST
+```
+
+Leave this session running ^^
+
+Now open a web browser on your client machine to http://localhost:8989 (this port must be the same as the CLIENT_PORT)
