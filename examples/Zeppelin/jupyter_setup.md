@@ -23,13 +23,13 @@ echo Cluster Name: $CLUSTER_NAME
 CLUSTER_HOSTS=$(curl -s -k -u $BI_USER:$BI_PASS  -X GET https://${BI_HOST}:9443/api/v1/clusters/${CLUSTER_NAME}/hosts | python -c 'import sys, json; items = json.load(sys.stdin)["items"]; hosts = [ item["Hosts"]["host_name"] for item in items ]; print(" ".join(hosts));')
 echo Cluster Hosts: $CLUSTER_HOSTS
 
-# Install anaconda and toree on the mastermanager node
 wget -c https://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh
-if [[ ! -d anaconda2 ]]
-then
-   bash Anaconda2-4.1.1-Linux-x86_64.sh -b
-   ./anaconda2/bin/pip install toree
-fi
+
+# Install anaconda if it isn't already installed
+[[ -d anaconda2 ]] || bash Anaconda2-4.1.1-Linux-x86_64.sh -b
+
+# check toree is available, if not install it
+./anaconda2/bin/python -c 'import toree' || ./anaconda2/bin/pip install toree
 
 # Install toree
 ./anaconda2/bin/jupyter toree install --spark_home=/usr/iop/current/spark-client/ --user --interpreters Scala,PySpark,SparkR  --spark_opts="--master yarn" --python_exec=${HOME}/anaconda2/bin/python2.7
@@ -39,9 +39,12 @@ for CLUSTER_HOST in ${CLUSTER_HOSTS};
 do 
    if [[ "$CLUSTER_HOST" != "$BI_HOST" ]];
    then
-      ssh $BI_USER@$CLUSTER_HOST \
-          wget -c https://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh && \
-          [[ ! -d anaconda2 ]] && bash Anaconda2-4.1.1-Linux-x86_64.sh -b
+      echo "*** Processing $CLUSTER_HOST ***"
+      ssh $BI_USER@$CLUSTER_HOST "wget -q -c https://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh"
+      ssh $BI_USER@$CLUSTER_HOST "[[ -d anaconda2 ]] || bash Anaconda2-4.1.1-Linux-x86_64.sh -b"
+
+      # You can install your pip modules on each node using something like this:
+      # ssh $BI_USER@$CLUSTER_HOST "${HOME}/anaconda2/bin/python -c 'import yourlibrary' || ${HOME}/anaconda2/pip install yourlibrary"
    fi
 done
 
