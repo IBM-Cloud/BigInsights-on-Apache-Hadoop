@@ -28,10 +28,10 @@ wget -c https://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh
 # Install anaconda if it isn't already installed
 [[ -d anaconda2 ]] || bash Anaconda2-4.1.1-Linux-x86_64.sh -b
 
-# check toree is available, if not install it
+# check toree python module is available, if not install it
 ./anaconda2/bin/python -c 'import toree' || ./anaconda2/bin/pip install toree
 
-# Install toree
+# Install toree into jupyter
 ./anaconda2/bin/jupyter toree install --spark_home=/usr/iop/current/spark-client/ --user --interpreters Scala,PySpark,SparkR  --spark_opts="--master yarn" --python_exec=${HOME}/anaconda2/bin/python2.7
 
 # Install anaconda on all of the cluster nodes
