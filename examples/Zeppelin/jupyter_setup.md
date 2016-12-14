@@ -85,6 +85,8 @@ Leave this session running ^^
 
 Now open a web browser on your client machine to http://localhost:8989 (this port must be the same as the CLIENT_PORT)
 
+# Test Jupyter
+
 Try running a pyspark job:
 
 ```python
