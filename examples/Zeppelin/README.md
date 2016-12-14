@@ -5,6 +5,8 @@ This example installs, configures and runs [Zeppelin](https://zeppelin.apache.or
 - to provide data scientists with notebook functionality
 - to provide example code in the form of notebooks for services such as hbase
 
+If you have an Enterprise cluster, you may be able to setup Jupyter - see [here](./jupyter_setup.md) for an example script.
+
 Recorded video walk through:
 
 [![Image of Youtube Video](./docs/title.png)](https://www.youtube.com/watch?v=R4vkhGoTVgM)
