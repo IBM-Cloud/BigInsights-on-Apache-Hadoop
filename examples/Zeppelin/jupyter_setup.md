@@ -13,10 +13,12 @@ export BI_USER=snowch
 export BI_PASS=changeme
 export BI_HOST=bi-hadoop-prod-4118.bi.services.us-south.bluemix.net
 ```
-
-Change the above values for your environment, then run
+Change the above values for your environment, then run the following.  The script attempts to be as idemopotent as possible so it shouldn't matter if you run it multiple times:
 
 ```bash
+# abort if the script encounters an error or undeclared variables
+set -euo
+
 CLUSTER_NAME=$(curl -s -k -u $BI_USER:$BI_PASS  -X GET https://${BI_HOST}:9443/api/v1/clusters | python -c 'import sys, json; print(json.load(sys.stdin)["items"][0]["Clusters"]["cluster_name"]);')
 echo Cluster Name: $CLUSTER_NAME
 
