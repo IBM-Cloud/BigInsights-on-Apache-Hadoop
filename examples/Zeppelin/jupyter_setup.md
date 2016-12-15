@@ -83,6 +83,8 @@ ssh -N -L $CLIENT_PORT:localhost:$JUPYTER_PORT $BI_USER@$BI_HOST
 
 Leave this session running ^^
 
+This command binds the CLIENT_PORT on the client machine.  This port listens for network connections.  It then forwards all network traffic to JUPYTER_PORT on the master manager node.
+
 Now open a web browser on your client machine to http://localhost:8989 (this port must be the same as the CLIENT_PORT)
 
 # Test Jupyter
