@@ -2,7 +2,11 @@
 
 This script installs and configures toree on a BigInsights on cloud 4.2 Enterprise cluster.
 
-Note that these instructions do NOT work for Basic clusters.
+Note these instructions:
+
+ - are currently broken: https://www.mail-archive.com/dev@toree.incubator.apache.org/msg00866.html
+ - do NOT work for Basic clusters.
+
 
 # Install Anaconda, Toree and Jupyter
 
