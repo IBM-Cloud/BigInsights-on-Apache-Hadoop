@@ -43,6 +43,8 @@ This section describes how to install Zeppelin on your cluster.  Zeppelin will g
 
 First copy the file `zeppelin_env.sh_template` to `zeppelin_env.sh`.  Ensure that the value for `ZEPPELIN_PORT` is set a port that is available on the cluster.  
 
+If you have installed anaconda python on all of your cluster nodes, uncomment the variables to in `zeppelin_env.sh` to point to your anaconda install.  If you want tips for installing anaconda - see [here](./anaconda_setup.md)
+
 Then copy the file `shiro.ini_template` to `shiro.ini`.
 
 Next open a command prompt window:
