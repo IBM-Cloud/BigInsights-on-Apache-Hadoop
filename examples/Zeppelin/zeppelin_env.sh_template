@@ -26,6 +26,12 @@ export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
 export SPARK_SUBMIT_OPTIONS="--packages cloudant-labs:spark-cloudant:1.6.4-s_2.10 --packages com.databricks:spark-csv_2.10:1.2.0"
 
+# If you want to use a different version of python, you could try setting the following
+# values to point to your python:
+#
+# export PYSPARK_PYTHON=/home/biadmin/anaconda2/bin/python2.7
+# export PYSPARK_DRIVER_PYTHON=/home/biadmin/anaconda2/bin/python2.7
+
 # WARNING: Zeppelin will listen for connections on this port and will not
 #          authenticate users.  Ensure the Zeppelin port is protected by a 
 #          firewall so that it is only available through a ssh tunnel to 
