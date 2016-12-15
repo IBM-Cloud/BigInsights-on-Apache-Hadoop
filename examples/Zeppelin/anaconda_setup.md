@@ -47,9 +47,9 @@ echo 'Finished installing'
 
 # Running a pyspark job
 
-To run a pyspark job to use anaconda python, set the following variables before running the `pyspark` command:
+If you are using pyspark, you can use anaconda python, set the following variables before running the `pyspark` command:
 
-```
+```bash
 export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
 export PYSPARK_PYTHON=/home/biadmin/anaconda2/bin/python2.7
