@@ -52,6 +52,8 @@ If you are using pyspark, you can use anaconda python, set the following variabl
 ```bash
 export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
+
+# set these to the folders where you installed anaconda
 export PYSPARK_PYTHON=/home/biadmin/anaconda2/bin/python2.7
 export PYSPARK_DRIVER_PYTHON=/home/biadmin/anaconda2/bin/python2.7
 ```
