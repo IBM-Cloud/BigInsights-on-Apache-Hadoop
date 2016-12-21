@@ -24,7 +24,16 @@
 
 export SPARK_HOME=/usr/iop/current/spark-client
 export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
-export SPARK_SUBMIT_OPTIONS="--packages cloudant-labs:spark-cloudant:1.6.4-s_2.10 --packages com.databricks:spark-csv_2.10:1.2.0"
+
+SPARK_SUBMIT_OPTIONS=""
+SPARK_SUBMIT_OPTIONS="$SPARK_SUBMIT_OPTIONS --packages cloudant-labs:spark-cloudant:1.6.4-s_2.10"
+SPARK_SUBMIT_OPTIONS="$SPARK_SUBMIT_OPTIONS --packages com.databricks:spark-csv_2.10:1.2.0"
+
+# fix for http://www.ibm.com/support/knowledgecenter/SSPT3X_4.2.0/com.ibm.swg.im.infosphere.biginsights.product.doc/doc/bi_spark.html
+SPARK_SUBMIT_OPTIONS="$SPARK_SUBMIT_OPTIONS --jars /usr/iop/4.2.0.0/hive/lib/datanucleus-api-jdo-3.2.6.jar,/usr/iop/4.2.0.0/hive/lib/datanucleus-core-3.2.10.jar,/usr/iop/4.2.0.0/hive/lib/datanucleus-rdbms-3.2.9.jar"
+SPARK_SUBMIT_OPTIONS="$SPARK_SUBMIT_OPTIONS --files /usr/iop/current/spark-client/conf/hive-site.xml"
+
+export SPARK_SUBMIT_OPTIONS
 
 # If you want to use a different version of python, you could try setting the following
 # values to point to your python:
