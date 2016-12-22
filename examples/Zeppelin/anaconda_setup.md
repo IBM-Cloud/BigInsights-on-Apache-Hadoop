@@ -56,4 +56,8 @@ export HADOOP_CONF_DIR=/usr/iop/current/hadoop-client/conf
 # set these to the folders where you installed anaconda
 export PYSPARK_PYTHON=/home/biadmin/anaconda2/bin/python2.7
 export PYSPARK_DRIVER_PYTHON=/home/biadmin/anaconda2/bin/python2.7
+
+spark-submit --master yarn --deploy-mode client ...
+
+# NOTE: --deploy-mode cluster does not seem to use the PYSPARK_PYTHON setting
 ```
