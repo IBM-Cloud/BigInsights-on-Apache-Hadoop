@@ -40,9 +40,9 @@ do
       # You can install your pip modules on each node using something like this:
       # ssh $BI_USER@$CLUSTER_HOST "${HOME}/anaconda2/bin/python -c 'import yourlibrary' || ${HOME}/anaconda2/pip install yourlibrary"
       
+      # Set the PYSPARK_PYTHON path on all of the nodes
       ssh $BI_USER@$CLUSTER_HOST "grep '^export PYSPARK_PYTHON=' ~/.bash_profile || echo export PYSPARK_PYTHON=${HOME}/anaconda2/bin/python2.7 >> ~/.bash_profile"
       ssh $BI_USER@$CLUSTER_HOST "sed -i -e 's;^export PYSPARK_PYTHON=.*$;export PYSPARK_PYTHON=${HOME}/anaconda2/bin/python2.7;g' ~/.bash_profile"
-      
       ssh $BI_USER@$CLUSTER_HOST "cat ~/.bash_profile"
    fi
 done
