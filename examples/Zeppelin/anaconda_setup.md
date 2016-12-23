@@ -28,25 +28,36 @@ wget -c https://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh
 # Install anaconda if it isn't already installed
 [[ -d anaconda2 ]] || bash Anaconda2-4.1.1-Linux-x86_64.sh -b
 
+sed -i '/^export PYSPARK_PYTHON/d' ~/.bash_profile
+grep '^export PYSPARK_PYTHON=' ~/.bash_profile || echo export PYSPARK_PYTHON=${HOME}/anaconda2/bin/python2.7 >> ~/.bash_profile
+
+sed -i '/^export PYSPARK_DRIVER_PYTHON/d' ~/.bash_profile
+grep '^export PYSPARK_DRIVER_PYTHON=' ~/.bash_profile || echo export PYSPARK_DRIVER_PYTHON=${HOME}/anaconda2/bin/python2.7 >> ~/.bash_profile
+
+
 # Install anaconda on all of the cluster nodes
 for CLUSTER_HOST in ${CLUSTER_HOSTS}; 
 do 
    if [[ "$CLUSTER_HOST" != "$BI_HOST" ]];
    then
       echo "*** Processing $CLUSTER_HOST ***"
-      ssh $BI_USER@$CLUSTER_HOST "wget -q -c https://repo.continuum.io/archive/Anaconda2-4.1.1-Linux-x86_64.sh"
+      scp Anaconda2-4.1.1-Linux-x86_64.sh $BI_USER@$CLUSTER_HOST:~/Anaconda2-4.1.1-Linux-x86_64.sh
       ssh $BI_USER@$CLUSTER_HOST "[[ -d anaconda2 ]] || bash Anaconda2-4.1.1-Linux-x86_64.sh -b"
 
       # You can install your pip modules on each node using something like this:
       # ssh $BI_USER@$CLUSTER_HOST "${HOME}/anaconda2/bin/python -c 'import yourlibrary' || ${HOME}/anaconda2/pip install yourlibrary"
       
       # Set the PYSPARK_PYTHON path on all of the nodes
+      ssh $BI_USER@$CLUSTER_HOST "sed -i '/^export PYSPARK_PYTHON/d' ~/.bash_profile"
       ssh $BI_USER@$CLUSTER_HOST "grep '^export PYSPARK_PYTHON=' ~/.bash_profile || echo export PYSPARK_PYTHON=${HOME}/anaconda2/bin/python2.7 >> ~/.bash_profile"
-      ssh $BI_USER@$CLUSTER_HOST "sed -i -e 's;^export PYSPARK_PYTHON=.*$;export PYSPARK_PYTHON=${HOME}/anaconda2/bin/python2.7;g' ~/.bash_profile"
+
+      ssh $BI_USER@$CLUSTER_HOST "sed -i '/^export PYSPARK_DRIVER_PYTHON/d' ~/.bash_profile"
+      ssh $BI_USER@$CLUSTER_HOST "grep '^export PYSPARK_DRIVER_PYTHON=' ~/.bash_profile || echo export PYSPARK_DRIVER_PYTHON=${HOME}/anaconda2/bin/python2.7 >> ~/.bash_profile"
+      
+      # verify .bash_profile
       ssh $BI_USER@$CLUSTER_HOST "cat ~/.bash_profile"
    fi
 done
-
 echo 'Finished installing'
 ```
 
