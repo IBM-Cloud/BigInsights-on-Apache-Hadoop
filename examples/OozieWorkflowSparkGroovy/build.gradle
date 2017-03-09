@@ -43,7 +43,7 @@ sourceSets {
 }
 
 // task to run the groovy script
-task('Example', dependsOn:'jar', type: JavaExec) {
+task('OozieMapReduce', dependsOn:'jar', type: JavaExec) {
 
     Properties props = new Properties()
     props.load(new FileInputStream("$projectDir/../../connection.properties"))
@@ -54,4 +54,8 @@ task('Example', dependsOn:'jar', type: JavaExec) {
 
     main = 'Example'
     classpath = sourceSets.main.runtimeClasspath
+}
+
+task('Example') {
+    dependsOn OozieMapReduce
 }

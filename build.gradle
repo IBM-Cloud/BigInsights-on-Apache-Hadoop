@@ -564,6 +564,7 @@ task baseTest(dependsOn: testSetup) << {
     println "Running base tests"
 
     [
+
       'Ambari':[],
       'WebHdfsGroovy':['KNOX'],
       'WebHdfsCurl':['KNOX'],
@@ -583,7 +584,7 @@ task baseTest(dependsOn: testSetup) << {
       // These will not be fixed until 4.2:
       'OozieWorkflowMapReduceGroovy':['KNOX', 'OOZIE', 'MAPREDUCE2'],
       'OozieWorkflowMapReduceCurl':['KNOX', 'OOZIE', 'MAPREDUCE2'],
-      //'OozieWorkflowSpark':['KNOX', 'OOZIE', 'SPARK'],
+      'OozieWorkflowSparkGroovy':['KNOX', 'OOZIE', 'SPARK'],
       //'OozieWorkflowCurl':['KNOX', 'OOZIE', 'MAPREDUCE2'],
       //'WebHCatGroovy':['KNOX', 'MAPREDUCE2', 'PIG', 'HIVE'],
     ]
