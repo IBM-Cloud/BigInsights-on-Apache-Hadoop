@@ -20,7 +20,7 @@ jar {
     destinationDir = file('samples')
 }
 
-task('Example', dependsOn:'jar', type: Exec) {
+task('OozieMapReduce', dependsOn:'jar', type: Exec) {
 
     environment 'gateway', props.gateway
     environment 'username', props.username
@@ -31,4 +31,8 @@ task('Example', dependsOn:'jar', type: Exec) {
     } else {
         commandLine "bash", "MapReduce.sh"
     }
+}
+
+task('Example') {
+    dependsOn OozieMapReduce
 }

@@ -581,7 +581,8 @@ task baseTest(dependsOn: testSetup) << {
       'HBaseJava':['KNOX', 'HBASE'],
       'BiginsightsHome':['BIGSQL'],
       // These will not be fixed until 4.2:
-      //'OozieWorkflowMapReduce':['KNOX', 'OOZIE', 'MAPREDUCE2'],
+      'OozieWorkflowMapReduceGroovy':['KNOX', 'OOZIE', 'MAPREDUCE2'],
+      'OozieWorkflowMapReduceCurl':['KNOX', 'OOZIE', 'MAPREDUCE2'],
       //'OozieWorkflowSpark':['KNOX', 'OOZIE', 'SPARK'],
       //'OozieWorkflowCurl':['KNOX', 'OOZIE', 'MAPREDUCE2'],
       //'WebHCatGroovy':['KNOX', 'MAPREDUCE2', 'PIG', 'HIVE'],
