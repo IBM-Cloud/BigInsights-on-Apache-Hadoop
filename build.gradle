@@ -564,13 +564,20 @@ task baseTest(dependsOn: testSetup) << {
     println "Running base tests"
 
     [
-
       'Ambari':[],
       'WebHdfsGroovy':['KNOX'],
       'WebHdfsCurl':['KNOX'],
       'HiveGroovy':['HIVE'],
       'HiveJava':['HIVE'],
-      // These are not integrated yet
+      'HBaseGroovy':['KNOX', 'HBASE'],
+      'HBaseJava':['KNOX', 'HBASE'],
+      'BiginsightsHome':['BIGSQL'],
+      'OozieWorkflowMapReduceGroovy':['KNOX', 'OOZIE', 'MAPREDUCE2'],
+      'OozieWorkflowMapReduceCurl':['KNOX', 'OOZIE', 'MAPREDUCE2'],
+      'OozieWorkflowSparkGroovy':['KNOX', 'OOZIE', 'SPARK'],
+      'WebHCatGroovy':['KNOX', 'MAPREDUCE2', 'PIG', 'HIVE'],
+
+      // These are not integrated yet from https://github.com/snowch/biginsight-examples
       //'SparkWordCount':['SPARK'],
       //'SparkStreamingPythonSsh':['SPARK'],
       //'ObjectStoreIntegrationWithSpark':['SPARK'],
@@ -578,15 +585,6 @@ task baseTest(dependsOn: testSetup) << {
       //'ElasticsearchIntegrationWithSpark':['SPARK'],
       //'DashDBIntegrationWithSpark':['SPARK'],
       //'DashDBIntegrationWithBigSQL':['BIGSQL'],
-      'HBaseGroovy':['KNOX', 'HBASE'],
-      'HBaseJava':['KNOX', 'HBASE'],
-      'BiginsightsHome':['BIGSQL'],
-      // These will not be fixed until 4.2:
-      'OozieWorkflowMapReduceGroovy':['KNOX', 'OOZIE', 'MAPREDUCE2'],
-      'OozieWorkflowMapReduceCurl':['KNOX', 'OOZIE', 'MAPREDUCE2'],
-      'OozieWorkflowSparkGroovy':['KNOX', 'OOZIE', 'SPARK'],
-      //'OozieWorkflowCurl':['KNOX', 'OOZIE', 'MAPREDUCE2'],
-      //'WebHCatGroovy':['KNOX', 'MAPREDUCE2', 'PIG', 'HIVE'],
     ]
     .each() { proj, service -> buildProject(proj, service) }
 
