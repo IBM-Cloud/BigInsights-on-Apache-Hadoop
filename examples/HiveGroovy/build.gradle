@@ -37,7 +37,7 @@ sourceSets {
 apply from: "${projectDir}/../../shared/common-helpers.gradle"
 
 // task to run a script
-task('Example', type: JavaExec) {
+task('CreateTable', type: JavaExec) {
 
     Properties props = new Properties()
     props.load(new FileInputStream("$projectDir/../../connection.properties"))
@@ -74,4 +74,8 @@ task('Example', type: JavaExec) {
     // run the groovy script
     main = 'Example'
     classpath = sourceSets.main.runtimeClasspath
+}
+
+task('Example') {
+    dependsOn CreateTable
 }
