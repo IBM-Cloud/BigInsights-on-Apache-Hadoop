@@ -1,0 +1,90 @@
+plugins {
+  id 'org.hidetake.ssh' version '1.5.0'
+
+  // required to build scala example
+  id 'scala'
+
+  // useful for working on scala example
+  id 'eclipse'
+}
+
+// set the dependencies for compiling the groovy script
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+	// required to build the spark example
+    compile 'org.apache.spark:spark-core_2.11:1.5.2'
+}
+
+// load some common helper methods
+apply from: "${projectDir}/../../shared/common-helpers.gradle"
+
+// get the cluster connection details
+Properties props = new Properties()
+props.load(new FileInputStream("$projectDir/../../connection.properties"))
+
+// the jar statement is required to package the Scala WordCount class
+// this is only required for the ScalaWordCount task
+    
+jar {
+    archiveName = 'scala-examples.jar'
+    destinationDir = file('samples')
+}
+
+task ScalaWordCount {
+
+    dependsOn jar
+
+    doLast {
+
+        def tmpDir = "test-${new Date().getTime()}"
+
+        def tmpHdfsDir = "/user/${props.username}/${tmpDir}"
+        
+        // ssh plugin documentation: https://gradle-ssh-plugin.github.io/docs/
+        
+        ssh.run {
+            // remotes.bicluster is defined in shared/common-helpers.gradle
+            session(remotes.bicluster) {
+
+                try {
+                    // initialise kerberos
+                    execute "kinit -k -t ${props.username}.keytab ${props.username}@IBM.COM"
+                } 
+                catch (Exception e) {
+                    println "problem running kinit - maybe this is a Basic cluster?"
+                }
+
+                // create temp local dir for holding LICENSE file before uploading it to hdfs
+                execute "mkdir ${tmpDir}"
+
+                // upload spark script and text file to process
+                put from: "${projectDir}/samples/scala-examples.jar", into: "${tmpDir}/scala-examples.jar"
+                put from: "${projectDir}/LICENSE", into: "${tmpDir}/LICENSE"
+
+                // create temp hdfs folder for holding LICENSE file
+                execute "hadoop fs -mkdir ${tmpHdfsDir}"
+                
+                // put LICENSE into hdfs
+                execute "hadoop fs -put ${tmpDir}/LICENSE ${tmpHdfsDir}/LICENSE"
+                
+                def clz = "--class \"org.apache.spark.examples.WordCount\""
+
+                // execute spark workcount job against the LICENSE file in hdfs
+                execute "spark-submit --master yarn-cluster --num-executors 3 --executor-cores 1 --executor-memory 1G ${clz} ${tmpDir}/scala-examples.jar ${tmpHdfsDir}/LICENSE"
+
+                // remove temporary hdfs dir
+                execute "hadoop fs -rm -r ${tmpHdfsDir}"
+
+                // remove temporary local dir
+                execute "rm -rf ${tmpDir}"
+            }
+        }
+    }
+}
+
+task Example {
+	dependsOn ScalaWordCount
+}
