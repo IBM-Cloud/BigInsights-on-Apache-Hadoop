@@ -64,6 +64,13 @@ This page lists all of the examples.
 - Compile a Map/Reduce Java application and submit it to Oozie using cURL [[OozieWorkflowMapReduceCurl](./OozieWorkflowMapReduceCurl/README.md)]
 - Compile a Spark Java application and submit it to Oozie using Groovy [[OozieWorkflowSparkGroovy](./OozieWorkflowSparkGroovy/README.md)]
 
+
+*********************************************************************
+
+#### Spark
+
+- Perform a simple word count using Pyspark [[SparkWordCountPython](./SparkWordCountPython/README.md)]
+
 *********************************************************************
 
 #### SquirrelSQL
