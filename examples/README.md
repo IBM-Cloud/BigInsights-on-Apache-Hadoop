@@ -71,7 +71,7 @@ This page lists all of the examples.
 
 - Perform a simple word count using Pyspark [[SparkWordCountPython](./SparkWordCountPython/README.md)]
 - Perform a simple word count using Scala [[SparkWordCountScala](./SparkWordCountScala/README.md)]
-- Spark Steaming with MessageHub example in Scala [[SparkMessageHubScala])./SparkMessageHubScala/README.md)]
+- Spark Steaming with MessageHub example in Scala [[SparkMessageHubScala](./SparkMessageHubScala/README.md)]
 
 *********************************************************************
 
