@@ -29,7 +29,7 @@ To run the examples, in a command prompt window:
       - `./gradlew Example` (OS X / *nix)
       - `gradlew.bat Example` (Windows)
    - While the streaming example is running, open a new terminal window and execute the python script, e.g.
-      - python send_message.py 12345
+      - `python send_message.py 12345`
    - Ssh into your cluster
    - Run `hdfs dfs -ls /user/<<your_username>>/` to see the output folders
    - Run `hdfs dfs -cat /user/<<your_username>>/test-<<output_folder_uuid>>/*`
