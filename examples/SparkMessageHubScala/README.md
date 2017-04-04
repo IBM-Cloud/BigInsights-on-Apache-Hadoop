@@ -1,6 +1,6 @@
 ## Overview
 
-This example shows how to execute a spark streaming example on the BigInsights cluster.  Note that the spark streaming job runs on a single node and not as a yarn application.
+This example shows how to execute a spark streaming example on the BigInsights cluster that consumes messages from IBM MessageHub (Kafka).  Note that the spark streaming job runs on a single node and not as a yarn application.
 
 ## Developer experience
 
@@ -10,11 +10,13 @@ Developers will gain the most from these examples if they are:
 - Able to read code written in a high level language such as [Groovy](http://www.groovy-lang.org/)
 - Familiar with the [Gradle](https://gradle.org/) build tool
 - Familiar with Spark concepts such as spark streaming
+- Familiar with MessageHub (Kafka)
 
 ## Example Requirements
 
 - You meet the [pre-requisites](../../README.md#pre-requisites) in the top level [README](../../README.md)
 - You have performed the [setup instructions](../../README.md#setup-instructions) in the top level [README](../../README.md)
+- You have setup an instance of MessageHub
 - If you want to use the python script for sending messages to kafka, you must have:
   - Python 3.x installed
   - kafka-python library installed (`pip install kafka-python`)
