@@ -70,6 +70,7 @@ This page lists all of the examples.
 #### Spark
 
 - Perform a simple word count using Pyspark [[SparkWordCountPython](./SparkWordCountPython/README.md)]
+- Perform a simple word count using Scala [[SparkWordCountScala](./SparkWordCountScala/README.md)]
 
 *********************************************************************
 
