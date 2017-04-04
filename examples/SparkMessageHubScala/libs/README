@@ -1,0 +1,4 @@
+Third party jars
+
+https://github.com/ibm-messaging/message-hub-samples/raw/master/kafka-0.9/message-hub-login-library/messagehub.login-1.0.0.jar
+https://github.com/ibm-messaging/iot-messgehub-spark-samples/releases/download/v0.1/streaming-kafka.jar
