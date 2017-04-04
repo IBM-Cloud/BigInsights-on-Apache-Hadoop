@@ -1,6 +1,6 @@
 ## Overview
 
-This example shows how to execute the spark wordcount example on the BigInsights cluster.  The wordcount is performed on an Apache 2 License file.
+This example shows how to execute a spark streaming example on the BigInsights cluster.  Note that the spark streaming job runs on a single node and not as a yarn application.
 
 ## Developer experience
 
@@ -9,48 +9,50 @@ Developers will gain the most from these examples if they are:
 - Comfortable using Windows, OS X or *nix command prompts
 - Able to read code written in a high level language such as [Groovy](http://www.groovy-lang.org/)
 - Familiar with the [Gradle](https://gradle.org/) build tool
-- Familiar with Spark concepts
+- Familiar with Spark concepts such as spark streaming
 
 ## Example Requirements
 
 - You meet the [pre-requisites](../../README.md#pre-requisites) in the top level [README](../../README.md)
 - You have performed the [setup instructions](../../README.md#setup-instructions) in the top level [README](../../README.md)
+- If you want to use the python script for sending messages, you must have:
+  - Python 3.x installed
+  - kafka-python library installed (`pip install kafka-python`)
 
 ## Run the example
 
 To run the examples, in a command prompt window:
 
+   - copy vcap.json_template to vcap.json
+   - edit vcap.json with your messagehub connection details
    - change into the directory containing this example and run gradle to execute the example
       - `./gradlew Example` (OS X / *nix)
       - `gradlew.bat Example` (Windows)
+   - While the streaming example is running, open a new terminal window and execute the python script, e.g.
+      - python send_message.py 12345
+   - Ssh into your cluster
+   - Run `hdfs dfs -ls /user/<<your_username>>/` to see the output folders
+   - Run `hdfs dfs -cat /user/<<your_username>>/test-<<output_folder_uuid>>/*`
 
-Output from the command will contain the wordcounts:
-
-```
-...
-bicluster#54|: 1136
-bicluster#54|limited: 4
-bicluster#54|all: 3
-bicluster#54|code: 1
-bicluster#54|managed: 1
-bicluster#54|customary: 1
-bicluster#54|Works,: 2
-bicluster#54|APPENDIX:: 1
-...
+You should see something like this:
 
 ```
+-bash-4.1$ hdfs dfs -cat /user/snowch/test-0458b164-007e-465a-89fe-13aa8f40f35d/*
+(null,12345)
+```
+
+When you have finished running, CTRL-C the window running `./gradlew Example`, then run `./gradlew KillAll` to kill the streaming example on the cluster.
+
 ## Decomposition Instructions
 
 The [./build.gradle](./build.gradle) script runs the example.  Build.gradle:
 
-- compiles [WordCount.scala](./src/main/scala/org/apache/spark/examples/WordCount.scala)
-- package WordCount classes into a jar file samples/scala-examples.jar
+- compiles [MessageHubConsumer.scala](./src/main/scala/biginsights/examples/MessageHubConsumer.scala)
+- package MessageHubConsumer classes and dependencies into a jar file `build/libs/SparkMessageHubScala-all.jar`
 
 It then uses a ssh plugin to:
 
-- copy samples/scala-examples.jar and [./LICENSE](./LICENSE) files to the BigInsights cluster
-- from the ssh session, use the `hadoop fs` command to add the LICENSE to hdfs
-- from the ssh session, execute the WordCount class with the `spark-submit` command
-- job is submitted against YARN cluster (BigInsights). You can retrieve log via `yarn logs -applicationID <application id>`
+- copy `build/libs/SparkMessageHubScala-all.jar` to the BigInsights cluster
+- from the ssh session, execute the MessageHubConsumer spark streaming job
 
-pip install --user kafka-python
+

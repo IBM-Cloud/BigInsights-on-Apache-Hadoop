@@ -77,23 +77,20 @@ task ScalaWordCount {
                 //        to other users.  We could probably bundle the properties in the jar file
                 //        and the app read them from there.
 
-                def args = "--conf spark.driver.args=\"${mhProps.kafka_brokers_sasl} ${mhProps.user} ${mhProps.password} ${mhProps.api_key} ${mhProps.kafka_rest_url} ${mhProps.topic} ${props.username}\""
+                def kafka_brokers = "${mhProps.kafka_brokers_sasl}".minus('[').minus(']').replaceAll(/\s*/, "")
+
+                def args = "--conf spark.driver.args=\"${kafka_brokers} ${mhProps.user} ${mhProps.password} ${mhProps.api_key} ${mhProps.kafka_rest_url} ${mhProps.topic} ${props.username}\""
 
                 def cmd = "spark-submit ${args} --num-executors 3 --executor-cores 1 --executor-memory 1G ${clz} ${tmpDir}/SparkMessageHubScala-all.jar"
 
-                println cmd
-                def pids = execute(cmd).trim().split(/ /)
-
-                println pids
-
-                // remove temporary local dir
-                execute "rm -rf ${tmpDir}"
+                println "Running: ${cmd}"
+                execute cmd
             }
         }
     }
 }
 
-task YarnApplicationList {
+task PsAll {
 
     doLast {
 
@@ -102,7 +99,26 @@ task YarnApplicationList {
         ssh.run {
             // remotes.bicluster is defined in shared/common-helpers.gradle
             session(remotes.bicluster) {
-                execute "yarn application -list"
+                execute '''ps aux | grep biginsights.examples.MessageHubConsumer'''
+            }
+        }
+    }
+}
+
+task KillAll {
+
+    doLast {
+
+        // ssh plugin documentation: https://gradle-ssh-plugin.github.io/docs/
+        
+        ssh.run {
+            // remotes.bicluster is defined in shared/common-helpers.gradle
+            session(remotes.bicluster) {
+                try {
+                    execute '''kill $(ps aux | grep biginsights.examples.MessageHubConsumer | awk '{print $2}')'''
+                } catch (Exception e) {
+                    println "Ignoring error from kill command"
+                }
             }
         }
     }

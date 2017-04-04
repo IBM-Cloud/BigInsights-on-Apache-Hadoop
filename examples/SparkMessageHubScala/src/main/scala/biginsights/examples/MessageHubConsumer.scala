@@ -19,6 +19,13 @@ object MessageHubConsumer{
     
     val appArgs = sc.get("spark.driver.args").split("\\s+")
 
+    println(appArgs(0))
+    println(appArgs(1))
+    println(appArgs(2))
+    println(appArgs(3))
+    println(appArgs(4))
+    println(appArgs(5))
+
     val kafkaProps = new MessageHubConfig
 
     kafkaProps.setConfig("bootstrap.servers",   appArgs(0))
