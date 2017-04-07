@@ -16,6 +16,7 @@ Developers will gain the most from these examples if they are:
 
 - You meet the [pre-requisites](../../README.md#pre-requisites) in the top level [README](../../README.md)
 - You have performed the [setup instructions](../../README.md#setup-instructions) in the top level [README](../../README.md)
+- You are using BigInsights 4.2 with Spark 1.6 (this solution has not been tested with BigInsights 4.3 and Spark 2.0)
 - You have setup an instance of MessageHub
 - If you want to use the python script for sending messages to kafka, you must have:
   - Python 3.x installed
