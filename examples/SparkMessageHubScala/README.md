@@ -51,6 +51,7 @@ When you have finished running, CTRL-C the window running `./gradlew Example`, t
 The [./build.gradle](./build.gradle) script runs the example.  Build.gradle:
 
 - compiles [MessageHubConsumer.scala](./src/main/scala/biginsights/examples/MessageHubConsumer.scala)
+- compiles helper classes in the package `com.ibm.cds.spark.samples.*`
 - package MessageHubConsumer classes and dependencies into a jar file `build/libs/SparkMessageHubScala-all.jar`
 
 It then uses a ssh plugin to:
@@ -58,4 +59,4 @@ It then uses a ssh plugin to:
 - copy `build/libs/SparkMessageHubScala-all.jar` to the BigInsights cluster
 - from the ssh session, execute the MessageHubConsumer spark streaming job
 
-
+It is recommended that you spend time investigating the classes in the package `com.ibm.cds.spark.samples.*`.  You will probably need to make changes in these classes.
