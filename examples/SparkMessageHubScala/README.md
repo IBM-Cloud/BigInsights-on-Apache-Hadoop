@@ -59,6 +59,4 @@ It then uses a ssh plugin to:
 - copy `build/libs/SparkMessageHubScala-all.jar` to the BigInsights cluster
 - from the ssh session, execute the MessageHubConsumer spark streaming job
 
-It is recommended that you spend time investigating the classes in the package `com.ibm.cds.spark.samples.*`.  You will probably need to make changes in these classes, especially in:
-
-- [MessageHubConfig#initConfigKeys() method](src/main/scala/com/ibm/cds/spark/samples/config/MessageHubConfig.scala)
+It is recommended that you spend time investigating the classes in the package `com.ibm.cds.spark.samples.*`.  You will probably need to make changes in these classes, especially in the method `initConfigKeys()` in [MessageHubConfig](src/main/scala/com/ibm/cds/spark/samples/config/MessageHubConfig.scala)
