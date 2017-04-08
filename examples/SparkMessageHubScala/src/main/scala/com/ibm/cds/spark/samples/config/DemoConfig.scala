@@ -29,19 +29,6 @@ class DemoConfig extends Serializable{
     props
   }
   
-  def set_hadoop_config(sc:SparkContext){
-    val prefix = "fs.swift.service." + getKeyOrFail("name") 
-    val hconf = sc.hadoopConfiguration
-    hconf.set(prefix + ".auth.url", getKeyOrFail("auth_url")+"/v2.0/tokens")
-    hconf.set(prefix + ".auth.endpoint.prefix", "endpoints")
-    hconf.set(prefix + ".tenant", getKeyOrFail("project_id"))
-    hconf.set(prefix + ".username", getKeyOrFail("user_id"))
-    hconf.set(prefix + ".password", getKeyOrFail("password"))
-    hconf.setInt(prefix + ".http.port", 8080)
-    hconf.set(prefix + ".region", getKeyOrFail("region"))
-    hconf.setBoolean(prefix + ".public", true)
-  }
-  
   def initConfigKeys(){
     //Overridable by subclasses
   }

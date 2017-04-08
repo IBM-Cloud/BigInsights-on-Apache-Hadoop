@@ -21,7 +21,9 @@ class MessageHubConfig extends DemoConfig{
   override def initConfigKeys(){
     config = config ++ Map[String,String]( 
       registerConfigKey(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG),
-      registerConfigKey(CommonClientConfigs.CLIENT_ID_CONFIG, "demo.watson.twitter.messagehub"),
+      registerConfigKey(CommonClientConfigs.CLIENT_ID_CONFIG, "biginsights.examples.messagehub.consumer"),
+      
+      // You may want to change these values
       registerConfigKey("auto.offset.reset", "latest"),
       registerConfigKey("acks", "-1"),
       registerConfigKey("retries", "0"),
@@ -30,18 +32,18 @@ class MessageHubConfig extends DemoConfig{
       registerConfigKey("buffer.memory", "33554432"),
       registerConfigKey("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"),
       registerConfigKey("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer"),
+
+      // You may want to change the password
+      registerConfigKey(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "changeit"),
       registerConfigKey(SslConfigs.SSL_PROTOCOL_CONFIG, "TLSv1.2"),
       registerConfigKey(SslConfigs.SSL_ENABLED_PROTOCOLS_CONFIG, "TLSv1.2"),
       registerConfigKey(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "JKS"),
       registerConfigKey(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, getDefaultSSLTrustStoreLocation),
-      registerConfigKey(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "changeit"),
       registerConfigKey(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "HTTPS"),
       registerConfigKey(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL" ),
       
       registerConfigKey(MessageHubConfig.KAFKA_USER_NAME),
-      registerConfigKey(MessageHubConfig.KAFKA_USER_PASSWORD),
-      registerConfigKey(MessageHubConfig.MESSAGEHUB_API_KEY),
-      registerConfigKey(MessageHubConfig.MESSAGEHUB_REST_URL)
+      registerConfigKey(MessageHubConfig.KAFKA_USER_PASSWORD)
     )    
   }
   
@@ -75,13 +77,8 @@ class MessageHubConfig extends DemoConfig{
 }
   
 object MessageHubConfig{
-  final val CHECKPOINT_DIR_KEY = "checkpointDir"
-  final val KAFKA_TOPIC_TWEETS = "kafka.topic.tweet"    //Key for name of the kafka topic holding used for publishing the tweets
   final val KAFKA_USER_NAME = "kafka.user.name"
   final val KAFKA_USER_PASSWORD = "kafka.user.password"
-  
-  final val MESSAGEHUB_API_KEY = "api_key"
-  final val MESSAGEHUB_REST_URL = "kafka_rest_url"
   
   private def fixPath(path: String):String = {
     path.replaceAll("\\ / : * ? \" < > |,", "_")

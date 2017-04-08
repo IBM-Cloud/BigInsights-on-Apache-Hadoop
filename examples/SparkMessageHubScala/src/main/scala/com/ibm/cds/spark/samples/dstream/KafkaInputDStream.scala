@@ -77,7 +77,10 @@ class KafkaReceiver[
     //Make sure the Jaas Login config param is set
     val jaasLoginParam = System.getProperty(JaasUtils.JAVA_LOGIN_CONFIG_PARAM);
     if ( jaasLoginParam == null ){
-      MessageHubConfig.createJaasConfiguration( kafkaParams.get(MessageHubConfig.KAFKA_USER_NAME).get, kafkaParams.get(MessageHubConfig.KAFKA_USER_PASSWORD).get)
+      MessageHubConfig.createJaasConfiguration( 
+          kafkaParams.get(MessageHubConfig.KAFKA_USER_NAME).get, 
+          kafkaParams.get(MessageHubConfig.KAFKA_USER_PASSWORD).get
+          )
     }
     
     
