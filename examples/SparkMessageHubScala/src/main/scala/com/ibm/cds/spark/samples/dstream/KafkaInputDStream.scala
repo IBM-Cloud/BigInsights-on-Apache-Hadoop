@@ -83,13 +83,14 @@ class KafkaReceiver[
           )
     }
     
-    
     val keyDeserializer = classTag[U].runtimeClass.getConstructor().newInstance().asInstanceOf[Deserializer[K]]
     val valueDeserializer = classTag[T].runtimeClass.getConstructor().newInstance().asInstanceOf[Deserializer[V]]
     
     //Create a new kafka consumer and subscribe to the relevant topics
     kafkaConsumer = new KafkaConsumer[K, V](kafkaParams)
     kafkaConsumer.subscribe( topics )
+    
+    val consumerPollDuration = (kafkaParams.get(MessageHubConfig.CONSUMER_POLL_DURATION_MS).get).toLong
     
     new Thread( new Runnable {
       def run(){
@@ -100,7 +101,7 @@ class KafkaReceiver[
             if ( kafkaConsumer != null ){
               kafkaConsumer.synchronized{     
                 //Poll for new events
-                it = kafkaConsumer.poll(1000L).iterator              
+                it = kafkaConsumer.poll(consumerPollDuration).iterator              
                 while( it != null && it.hasNext() ){
                   //Get the record and store it
                   val record = it.next();
@@ -110,7 +111,7 @@ class KafkaReceiver[
               }
             }            
 
-            Thread.sleep( 1000L )
+            Thread.sleep( consumerPollDuration )
           }  
           println("Exiting Thread")
         }catch{

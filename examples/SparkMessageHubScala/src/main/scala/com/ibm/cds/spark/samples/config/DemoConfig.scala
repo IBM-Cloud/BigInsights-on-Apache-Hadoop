@@ -7,10 +7,6 @@ import scala.collection.JavaConversions._
 import org.apache.spark.SparkContext
 
 
-/**
- * @author dtaieb
- */
-
 class DemoConfig extends Serializable{  
   
   //Hold configuration key/value pairs

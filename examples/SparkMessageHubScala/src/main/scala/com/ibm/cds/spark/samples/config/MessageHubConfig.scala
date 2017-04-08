@@ -12,13 +12,12 @@ import java.io.File
 import javax.net.ssl.SSLContext
 import org.codehaus.jettison.json.JSONObject
 
-
-/**
- * @author dtaieb
- */
 class MessageHubConfig extends DemoConfig{  
+  
   lazy val kafkaOptionKeys = ListBuffer[String]()
+  
   override def initConfigKeys(){
+    
     config = config ++ Map[String,String]( 
       registerConfigKey(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG),
       registerConfigKey(CommonClientConfigs.CLIENT_ID_CONFIG, "biginsights.examples.messagehub.consumer"),
@@ -32,6 +31,9 @@ class MessageHubConfig extends DemoConfig{
       registerConfigKey("buffer.memory", "33554432"),
       registerConfigKey("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"),
       registerConfigKey("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer"),
+      
+      // used to control the poll frequency in com.ibm.cds.spark.samples.dstream.KafkaInputDStream
+      registerConfigKey(MessageHubConfig.CONSUMER_POLL_DURATION_MS, "1000"),
 
       // You may want to change the password
       registerConfigKey(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, "changeit"),
@@ -79,6 +81,7 @@ class MessageHubConfig extends DemoConfig{
 object MessageHubConfig{
   final val KAFKA_USER_NAME = "kafka.user.name"
   final val KAFKA_USER_PASSWORD = "kafka.user.password"
+  final val CONSUMER_POLL_DURATION_MS = "consumer.poll.duration.ms"
   
   private def fixPath(path: String):String = {
     path.replaceAll("\\ / : * ? \" < > |,", "_")
