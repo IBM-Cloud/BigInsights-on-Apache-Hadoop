@@ -2,6 +2,10 @@
 
 This example shows how to execute a spark streaming example on the BigInsights cluster that consumes messages from IBM MessageHub (Kafka).  Note that the spark streaming job runs on a single node and not as a yarn application.
 
+## See also
+
+- Please add your +1 to this [ticket](https://github.com/ibm-messaging/message-hub-samples/issues/11) to add additional examples for pyspark and spark 2.x
+
 ## Developer experience
 
 Developers will gain the most from these examples if they are:
