@@ -7,7 +7,7 @@ This example shows how to execute a spark streaming example on the BigInsights c
 Developers will gain the most from these examples if they are:
 
 - Comfortable using Windows, OS X or *nix command prompts
-- Able to read code written in a high level language such as [Groovy](http://www.groovy-lang.org/)
+- Familiar with Scala
 - Familiar with the [Gradle](https://gradle.org/) build tool
 - Familiar with Spark concepts such as spark streaming
 - Familiar with MessageHub (Kafka)
