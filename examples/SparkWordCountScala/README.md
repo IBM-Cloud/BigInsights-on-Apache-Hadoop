@@ -2,10 +2,6 @@
 
 This example shows how to execute the spark wordcount example on the BigInsights cluster.  The wordcount is performed on an Apache 2 License file.
 
-## See also
-
-See here for a similar project aimed at IBM Data Science Experience (DSX) - https://github.com/snowch/SparkMessageHubScala
-
 ## Developer experience
 
 Developers will gain the most from these examples if they are:
