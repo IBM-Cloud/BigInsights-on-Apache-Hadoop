@@ -4,6 +4,7 @@ This example shows how to execute a spark streaming example on the BigInsights c
 
 ## See also
 
+- See here for a similar project aimed at IBM Data Science Experience (DSX) - https://github.com/snowch/SparkMessageHubScala
 - Please add your +1 to this [ticket](https://github.com/ibm-messaging/message-hub-samples/issues/11) to add similar examples to this example for pyspark and spark 2.x
 
 ## Developer experience
