@@ -60,6 +60,16 @@ task SubmitToYarn {
                     println "problem running kinit - maybe this is a Basic cluster?"
                 }
 
+
+                def psCmd = "yarn application -list 2>/dev/null | grep 'biginsights.examples.MessageHubConsumer' | awk '{print \$1}'"
+
+                def application_ids = execute psCmd
+                if (application_ids.size() > 0) {
+                    throw new GradleException("ERROR:  ** Found yarn application already running.  Kill other applications with `./gradlew KillAll` **")
+                }
+
+
+
                 // create temp local dir for holding LICENSE file before uploading it to hdfs
                 execute "mkdir ${tmpDir}"
 
@@ -120,11 +130,13 @@ task KillAll {
 
                 def application_ids = execute cmd
 
-                application_ids.split('\n').each { appId ->
-                    try {
-                        execute "yarn application -kill ${appId}"
-                    } catch (Exception e) {
-                        println "Ignoring error from kill command"
+                if (application_ids.size() > 0) {
+                    application_ids.split('\n').each { appId ->
+                        try {
+                            execute "yarn application -kill ${appId}"
+                        } catch (Exception e) {
+                            println "Ignoring error from kill command"
+                        }
                     }
                 }
             }
