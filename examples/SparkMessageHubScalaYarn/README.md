@@ -1,6 +1,10 @@
 ## Overview
 
-This example shows how to execute a spark streaming example on the BigInsights cluster that consumes messages from IBM MessageHub (Kafka).  Note that the spark streaming job runs on a single node and not as a yarn application.
+This example shows how to execute a spark streaming example on the BigInsights cluster that consumes messages from IBM MessageHub (Kafka).  
+
+## Also see
+
+This example is similar to [SparkMessageHubScala](./SparkMessageHubScala) but in this version the spark streaming job runs as a yarn application. If you are just starting with Spark Streaming and MessageHub, it is recommended that you use the example [SparkMessageHubScala](./SparkMessageHubScala) as it is much easier to debug.
 
 ## Developer experience
 
@@ -29,22 +33,22 @@ To run the examples, in a command prompt window:
    - copy vcap.json_template to vcap.json
    - edit vcap.json with your messagehub connection details
    - change into the directory containing this example and run gradle to execute the example
-      - `./gradlew Example` (OS X / *nix)
-      - `gradlew.bat Example` (Windows)
-   - While the streaming example is running, open a new terminal window and execute the python script, e.g.
+      - `./gradlew SubmitToYarn` (OS X / *nix)
+      - `gradlew.bat SubmitToYarn` (Windows)
+   - next run the following command to ensure the application is running on yarn:
+      - `./gradlew PsAll` (OS X / *nix)
+      - `gradlew.bat PsAll` (Windows)
+   - next run the following command inspect the data in HDFS:
+      - `./gradlew CatHdfs` (OS X / *nix)
+      - `gradlew.bat CatHdfs` (Windows)
+   - next open a new terminal window and execute the python script, e.g.
       - `python send_message.py 12345`
-   - Ssh into your cluster
-   - Run `hdfs dfs -ls /user/<<your_username>>/` to see the output folders
-   - Run `hdfs dfs -cat /user/<<your_username>>/test-<<output_folder_uuid>>/*`
+   - wait a minute or so, then run
+      - `./gradlew CatHdfs` (OS X / *nix)
+      - `gradlew.bat CatHdfs` (Windows)
+      - You should see the data sent with `send_message.py`
 
-You should see something like this:
-
-```
--bash-4.1$ hdfs dfs -cat /user/snowch/test-0458b164-007e-465a-89fe-13aa8f40f35d/*
-(null,12345)
-```
-
-When you have finished running, CTRL-C the window running `./gradlew Example`, then run `./gradlew KillAll` to kill the streaming example on the cluster.
+When you have finished run `./gradlew KillAll` to kill the streaming example on the cluster.
 
 ## Decomposition Instructions
 
