@@ -76,10 +76,10 @@ task SubmitToYarn {
                 println "Uploading SparkMessageHubScala-all.jar to cluster - this may take some time"
 
                 // upload spark script and text file to process
-                put from: "${projectDir}/build/libs/SparkMessageHubScala-all.jar", 
-                    into: "${tmpDir}/SparkMessageHubScala-all.jar"
+                put from: "${projectDir}/build/libs/SparkMessageHubScalaYarn-all.jar", 
+                    into: "${tmpDir}/SparkMessageHubScalaYarn-all.jar"
 
-                println "Finished Uploading SparkMessageHubScala-all.jar"
+                println "Finished Uploading SparkMessageHubScalaYarn-all.jar"
 
                 def clz = "--class \"biginsights.examples.MessageHubConsumer\""
 
@@ -91,7 +91,7 @@ task SubmitToYarn {
 
                 def args = "--conf spark.driver.args=\"${kafka_brokers} ${mhProps.user} ${mhProps.password} ${mhProps.api_key} ${mhProps.kafka_rest_url} ${mhProps.topic} ${props.username}\""
 
-                def cmd = "spark-submit ${args} --master yarn --deploy-mode cluster --num-executors 3 --executor-cores 1 --executor-memory 1G ${clz} ${tmpDir}/SparkMessageHubScala-all.jar > /dev/null 2>&1 &"
+                def cmd = "spark-submit ${args} --master yarn --deploy-mode cluster --num-executors 3 --executor-cores 1 --executor-memory 1G ${clz} ${tmpDir}/SparkMessageHubScalaYarn-all.jar > /dev/null 2>&1 &"
 
                 println "Running: ${cmd}"
                 execute cmd
