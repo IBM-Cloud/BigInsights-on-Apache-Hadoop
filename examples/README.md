@@ -72,6 +72,7 @@ This page lists all of the examples.
 - Perform a simple word count using Pyspark [[SparkWordCountPython](./SparkWordCountPython/README.md)]
 - Perform a simple word count using Scala [[SparkWordCountScala](./SparkWordCountScala/README.md)]
 - Spark Streaming MessageHub consumer in Scala [[SparkMessageHubScala](./SparkMessageHubScala/README.md)]
+- Spark Streaming MessageHub consumer in Scala running on Yarn [[SparkMessageHubScalaYarn](./SparkMessageHubScalaYarn/README.md)]
 
 *********************************************************************
 
