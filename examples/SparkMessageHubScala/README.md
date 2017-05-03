@@ -2,12 +2,17 @@
 
 This example shows how to execute a spark streaming example on the BigInsights cluster that consumes messages from IBM MessageHub (Kafka).  Note that the spark streaming job runs on a single node and not as a yarn application.
 
+## See also
+
+- See here for a similar project aimed at IBM Data Science Experience (DSX) - https://github.com/snowch/SparkMessageHubScala
+- Please add your +1 to this [ticket](https://github.com/ibm-messaging/message-hub-samples/issues/11) to add similar examples to this example for pyspark and spark 2.x
+
 ## Developer experience
 
 Developers will gain the most from these examples if they are:
 
 - Comfortable using Windows, OS X or *nix command prompts
-- Able to read code written in a high level language such as [Groovy](http://www.groovy-lang.org/)
+- Familiar with Scala
 - Familiar with the [Gradle](https://gradle.org/) build tool
 - Familiar with Spark concepts such as spark streaming
 - Familiar with MessageHub (Kafka)
@@ -59,6 +64,4 @@ It then uses a ssh plugin to:
 - copy `build/libs/SparkMessageHubScala-all.jar` to the BigInsights cluster
 - from the ssh session, execute the MessageHubConsumer spark streaming job
 
-It is recommended that you spend time investigating the classes in the package `com.ibm.cds.spark.samples.*`.  You will probably need to make changes in these classes, especially in:
-
-- [MessageHubConfig#initConfigKeys() method](src/main/scala/com/ibm/cds/spark/samples/config/MessageHubConfig.scala)
+It is recommended that you spend time investigating the classes in the package `com.ibm.cds.spark.samples.*`.  You will probably need to make changes in these classes, especially in the method `initConfigKeys()` in [MessageHubConfig](src/main/scala/com/ibm/cds/spark/samples/config/MessageHubConfig.scala)

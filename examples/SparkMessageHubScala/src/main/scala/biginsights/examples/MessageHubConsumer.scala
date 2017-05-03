@@ -24,8 +24,11 @@ object MessageHubConsumer{
     kafkaProps.setConfig("bootstrap.servers",   appArgs(0))
     kafkaProps.setConfig("kafka.user.name",     appArgs(1))
     kafkaProps.setConfig("kafka.user.password", appArgs(2))
+
+    // TODO these parameters aren't used and can probably be removed
     kafkaProps.setConfig("api_key",             appArgs(3))
     kafkaProps.setConfig("kafka_rest_url",      appArgs(4))
+
     kafkaProps.setConfig("kafka.topic",         appArgs(5))
 
     val username = appArgs(6)
