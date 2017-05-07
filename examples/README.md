@@ -5,6 +5,8 @@ This page lists all of the examples.
 #### Notebooks
 
 - Connect to BigSQL from Spark (e.g. on Data Science Experience) [[BigSQL](./notebooks/BigSQL.ipynb)]
+- Connect to WebHDFS from Spark (e.g. on Data Science Experience) [[WebHDFS](./notebooks/WebHDFS.ipynb)]
+
 
 *********************************************************************
 
