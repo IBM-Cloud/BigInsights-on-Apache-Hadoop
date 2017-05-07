@@ -6,6 +6,8 @@ This page lists all of the examples.
 
 - Connect to BigSQL from Spark (e.g. on Data Science Experience) [[BigSQL](./notebooks/BigSQL.ipynb)]
 
+*********************************************************************
+
 #### Ambari
 
 - Performs HDFS service check via Ambari REST api using Groovy [[Ambari](./Ambari/README.md)]
