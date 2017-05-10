@@ -30,20 +30,17 @@ if (hostname == null) {
 
 def hiveServerHost = getMasters(props)['HIVE_SERVER'][0]
 
+
 task('DownloadSquirrel', type:Copy) {
 
     // always run this task - don't let gradle decide when to run it
     outputs.upToDateWhen { false }
 
-    def url = 'http://downloads.sourceforge.net/project/squirrel-sql/1-stable/3.7.1-plainzip/squirrelsql-3.7.1-optional.zip?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fsquirrel-sql%2Ffiles%2F1-stable%2F3.7.1-plainzip%2F&ts=1464716393&use_mirror=netcologne'
+    def url = 'http://sourceforge.mirrorservice.org/s/sq/squirrel-sql/1-stable/3.7.1-plainzip/squirrelsql-3.7.1-optional.zip'
 
-    def f = file('squirrelsql-3.7.1-optional.zip')
-    if (!f.exists()) {
-        new URL(url).withInputStream{ i -> f.withOutputStream{ it << i }}
-    }
+    ant.get(src: url, dest: '.', skipexisting: 'true')
+    ant.unzip(src: './squirrelsql-3.7.1-optional.zip', dest: '.')
 
-    from zipTree(f) 
-    into projectDir
 }
 
 task('CreateConfig') {
