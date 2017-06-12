@@ -36,6 +36,16 @@ props.load(new FileInputStream("$projectDir/connection.properties"))
 // extract BigInsights hostname from the gateway url
 def matcher = props.gateway =~ /^(https?:\/\/)([^:^\/]*):(\d*)?(.*)?.*$/
 
+if (!matcher.asBoolean()) {
+   throw new GradleException(
+            """
+            Format error in connection.properties.
+            Gateway property "$props.gateway" does not match expected format of:
+                https://hhhh:nnnn/gateway/default
+            """.stripIndent()
+            )
+}
+
 def mastermanager_hostname = matcher[0][2]
 
 def mastermanager_port = matcher[0][3]
